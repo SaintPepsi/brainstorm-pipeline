@@ -1,0 +1,96 @@
+# Design-to-Deploy Pipeline Configuration
+#
+# Copy this file to .design-to-deploy.yml and customize for your project.
+#
+# This configuration defines:
+# - Test framework and command settings
+# - Output directory paths
+# - Validation constraints
+
+# Testing Configuration
+# Defines test frameworks and how to run tests for verification stages
+testing:
+  unit:
+    # Unit testing framework (e.g., vitest, jest, mocha)
+    framework: vitest
+    # Path to framework configuration file (relative to project root)
+    config: vitest.config.ts
+    # Command to run all unit tests (must exit with 0 on success)
+    command: "npx vitest run"
+
+  e2e:
+    # End-to-end testing framework (e.g., playwright, cypress)
+    framework: playwright
+    # Path to framework configuration file
+    config: playwright.config.ts
+    # Command to run all e2e tests
+    command: "npx playwright test"
+    # Directory where screenshots are captured on failure
+    screenshot_dir: "e2e/screenshots"
+
+# Output Paths Configuration
+# Specifies where pipeline artifacts are stored
+paths:
+  # Directory for design documents (created by BRAINSTORM stage)
+  designs: "docs/designs"
+  # Directory for test plans and implementation plans
+  plans: "docs/plans"
+  # Directory for session history (timestamped subdirectories)
+  session_history: "session-history"
+
+# Validation Constraints
+# Rules that guide and validate pipeline execution
+validation:
+  # Maximum number of files that a single design can recommend creating
+  # Helps prevent over-scoping features
+  max_files_to_create: 10
+
+  # Maximum estimated implementation hours for a single design
+  # Used to split large designs into multiple PR-sized chunks
+  max_implementation_hours: 4
+
+  # Whether to require explicit scope declaration in design doc
+  # If true, VALIDATE_SPLIT stage will fail if scope is not clearly stated
+  require_scope_declaration: true
+
+# ============================================================================
+# ADVANCED CUSTOMIZATION
+# ============================================================================
+#
+# You can extend this configuration with custom settings:
+#
+# testing_advanced:
+#   unit:
+#     # Run unit tests with specific filter
+#     command: "npx vitest run --grep 'auth|user'"
+#     # Specify coverage threshold
+#     coverage_threshold: 80
+#   e2e:
+#     # Run specific test suite
+#     command: "npx playwright test --config playwright.config.ts --project=chromium"
+#     # Wait time for test setup
+#     timeout_ms: 30000
+#
+# git:
+#   # Merge strategy for feature branch
+#   merge_strategy: "squash"
+#   # Whether to push to remote on success
+#   push_to_remote: true
+#   # Default branch (usually 'main' or 'master')
+#   default_branch: "main"
+#
+# claude:
+#   # Model to use for Claude Code invocations
+#   model: "claude-opus-4-5"
+#   # Temperature for more deterministic behavior
+#   temperature: 0.2
+#   # Maximum tokens per stage
+#   max_tokens: 20000
+#
+# retry:
+#   # Maximum retry attempts for test verification
+#   max_attempts: 4
+#   # Delay between retry attempts (seconds)
+#   delay_between_attempts: 2
+#   # Enable verbose debugging during retries
+#   verbose_debugging: true
