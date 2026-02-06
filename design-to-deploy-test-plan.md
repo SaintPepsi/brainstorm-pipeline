@@ -55,9 +55,11 @@ git stash                      # Stash any WIP if needed
 
 Each step below maps to a pipeline stage. Run them in Claude Code using the skill.
 
+### Phase 1 (Interactive)
+
 ### Stage 1: BRAINSTORM
 
-**What happens:** A fresh agent takes your idea and produces a structured design doc through dialogue.
+**What happens:** The agent reads `brainstormer.md` in its own context and has a back-and-forth conversation with you. This is NOT a sub-agent — you'll be asked questions and need to make decisions. The agent explores the codebase first, then works with you to shape the idea into a design doc.
 
 **Command (in Claude Code):**
 ```
@@ -68,12 +70,20 @@ Idea: "Add a kill counter that tracks total enemies killed in the current run, d
 Project root: /Users/hogers/Documents/repos/rogue-like-cards
 ```
 
+**Expected behaviour:**
+- The agent explores the codebase (looks at gameState, StatsPanel, existing patterns)
+- The agent asks you clarifying questions (e.g. "Should the counter persist between runs?")
+- You answer and iterate until the design is solid
+- The agent writes the design doc
+
 **Expected output:**
-- `session-history/{SESSION_ID}/00-brainstorm-transcript.md`
 - `session-history/{SESSION_ID}/01-design-doc.md`
 - `docs/designs/2026-02-06-kill-counter-design.md`
 
 **What to verify:**
+- [ ] Agent asked you questions (not just generated everything silently)
+- [ ] Agent did NOT spawn a Task agent for brainstorming
+- [ ] Agent read `brainstormer.md` but did NOT read other sub-skill docs
 - [ ] Design doc has a Scope Declaration section with Type: `atomic-feature`
 - [ ] Design doc mentions `gameState.svelte.ts` as the store to modify
 - [ ] Design doc mentions `StatsPanel.svelte` as the UI to update
@@ -82,11 +92,13 @@ Project root: /Users/hogers/Documents/repos/rogue-like-cards
 
 **Commit:** `design(kill-counter): brainstorm complete`
 
+### Phase 2 (Autonomous)
+
 ---
 
 ### Stage 2: VALIDATE & SPLIT
 
-**What happens:** A fresh agent reads the design doc and validates scope. For this feature, it should pass without splitting.
+**What happens:** A Task agent (sub-agent) reads `scope-validator.md` + the design doc and validates scope. For this feature, it should pass without splitting. From here on, all stages run autonomously as Task agents — no user interaction needed.
 
 **Expected output:**
 - `session-history/{SESSION_ID}/02-scope-validation.md`
@@ -299,8 +311,7 @@ cat session-history/{SESSION_ID}/failure-report.md
 cd ../worktrees/{SESSION_ID}
 git log --oneline
 
-# Manual fix, then resume
-# (back in Claude Code): /design-to-deploy --resume
+# Manual fix, then resume from the failed stage
 ```
 
 ---
@@ -309,16 +320,18 @@ git log --oneline
 
 The pipeline test is considered successful if:
 
-1. **All 13 stages complete** without manual intervention
-2. **Design doc** is coherent and matches the idea
-3. **Scope validation** correctly identifies this as atomic (no split)
-4. **Plans are consistent** — cross-check finds no major gaps
-5. **Tests are real** — not stubs, actually test meaningful behaviour
-6. **Tests fail before feature** and pass after
-7. **Feature code** follows project conventions from CLAUDE.md
-8. **No existing tests break**
-9. **Session history** is complete with all artifacts
-10. **Git history** has clean conventional commits at each stage
+1. **Phase 1 is interactive** — agent asks questions, user can answer, design is shaped through dialogue
+2. **Phase 2 is autonomous** — all stages from scope validation onwards run as Task agents without user interaction
+3. **Context isolation works** — agent does NOT read sub-skill docs (other than brainstormer.md) in its main context
+4. **Design doc** is coherent and matches the idea
+5. **Scope validation** correctly identifies this as atomic (no split)
+6. **Plans are consistent** — cross-check finds no major gaps
+7. **Tests are real** — not stubs, actually test meaningful behaviour
+8. **Tests fail before feature** and pass after
+9. **Feature code** follows project conventions from CLAUDE.md
+10. **No existing tests break**
+11. **Session history** is complete with all artifacts
+12. **Git history** has clean conventional commits at each stage
 
 ---
 
@@ -339,8 +352,7 @@ The pipeline test is considered successful if:
 
 Based on results, you'll likely want to adjust:
 
-1. **Prompt templates** — if agents produce off-target output, refine the prompts in `references/prompts/`
-2. **Sub-skill docs** — if agents miss project conventions, add project-specific context to sub-skill references
-3. **Scope thresholds** — if validation is too strict/loose, adjust limits in the scope-validator sub-skill doc
-4. **Commit messages** — if the pre-commit hook interferes, add hook handling to the orchestrator
-5. **Test verification retries** — if tests are flaky, adjust max attempts or add retry delay
+1. **Sub-skill docs** — if agents miss project conventions, add project-specific context to sub-skill references
+2. **Scope thresholds** — if validation is too strict/loose, adjust limits in the scope-validator sub-skill doc
+3. **SKILL.md instructions** — if the agent reads sub-skill docs in its own context or spawns brainstorm as a Task, strengthen the Phase 1/Phase 2 instructions
+4. **Test verification retries** — if tests are flaky, adjust max attempts or add retry delay

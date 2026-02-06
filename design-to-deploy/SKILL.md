@@ -5,24 +5,54 @@ description: "Recursive multi-agent pipeline that automates idea to design to im
 
 # Design-to-Deploy Pipeline
 
-Automate the journey from rough idea to verified, tested implementation using context-isolated agent stages.
+Automate the journey from rough idea to verified, tested implementation.
 
-## Core Principle: Context Isolation
+## Two Phases
 
-Each pipeline stage runs in a **fresh agent context** (via the Task tool) with only the specific input files it needs. Artifacts pass via filesystem, not accumulated context. This prevents context pollution across stages.
+The pipeline has two distinct phases with different execution models:
 
-## Pipeline
+**Phase 1 — Interactive Brainstorm (main context).** You talk directly with the user to shape their idea into a design doc. This is a conversation — the user needs to answer questions, make decisions, and approve the design. Run this in your own context, not as a sub-agent.
+
+**Phase 2 — Autonomous Build (sub-agents).** Once the design doc captures all decisions, the remaining stages run autonomously as Task agents. Each stage gets a fresh context with only the files it needs. No user interaction required.
+
+## CRITICAL: Context Isolation Rules
+
+1. **Do NOT read sub-skill docs in your main context** (except `brainstormer.md` for Phase 1). When spawning Task agents for Phase 2, pass the sub-skill doc path in the prompt and let the Task agent read it.
+2. **Each Task agent gets only** the sub-skill doc path + its specific input files. Never dump accumulated context into a Task prompt.
+3. **Artifacts pass via filesystem.** Each stage writes its output to `session-history/`, and the next stage reads from there.
+
+Bad (pollutes your context):
+```
+# DON'T do this
+Read references/sub-skills/scope-validator.md   ← you're reading it yourself
+Then spawn Task agent with the content
+```
+
+Good (context stays clean):
+```
+# DO this
+Spawn Task agent with prompt:
+  "Read references/sub-skills/scope-validator.md, then validate the design doc at
+   session-history/{SESSION_ID}/01-design-doc.md. Write output to
+   session-history/{SESSION_ID}/02-scope-validation.md"
+```
+
+## Pipeline Overview
 
 ```
-BRAINSTORM -> VALIDATE SCOPE -> [PLAN UNIT | PLAN E2E | PLAN FEATURE] -> CROSS-CHECK
-    -> IMPL TESTS (failing) -> IMPL FEATURE -> VERIFY TESTS -> VERIFY DESIGN -> REVIEW
+Phase 1 (interactive, main context):
+  BRAINSTORM with user → design doc
+
+Phase 2 (autonomous, Task agents):
+  VALIDATE SCOPE → [PLAN UNIT | PLAN E2E | PLAN FEATURE] → CROSS-CHECK
+    → IMPL TESTS (failing) → IMPL FEATURE → VERIFY TESTS → VERIFY DESIGN → REVIEW
 ```
 
 ## How to Run
 
 ### 1. Set Up Worktree
 
-Create an isolated branch for the pipeline. All work happens here — main stays clean.
+Create an isolated branch. All work happens here — main stays clean.
 
 ```bash
 TOPIC="my-feature"  # kebab-case, derived from the idea
@@ -33,51 +63,61 @@ cd .worktrees/${SESSION_ID}
 mkdir -p session-history/${SESSION_ID}/08-test-results/screenshots
 ```
 
-### 2. Run Each Stage
+### 2. Phase 1 — Interactive Brainstorm
 
-For each stage, read the sub-skill doc, then spawn a **fresh Task agent** with the relevant context. Commit after each stage completes.
+**Run this yourself in main context. Do NOT spawn a Task agent.**
 
-**Stage 1 — Brainstorm:** Read `references/sub-skills/brainstormer.md`. Spawn Task agent with user's idea + project context. Agent explores the codebase and produces a design doc.
-- Output: `session-history/${SESSION_ID}/01-design-doc.md` + `docs/designs/YYYY-MM-DD-${TOPIC}-design.md`
-- Commit: `design(${TOPIC}): brainstorm complete`
+Read `references/sub-skills/brainstormer.md` for the brainstorm process. Then have a conversation with the user:
 
-**Stage 2 — Validate Scope:** Read `references/sub-skills/scope-validator.md`. Spawn Task agent with the design doc. Agent checks scope against heuristics, may split into multiple design docs.
+1. Explore the codebase to understand existing patterns, architecture, and conventions.
+2. Ask the user probing questions about their idea — what problem it solves, constraints, expected behaviour.
+3. Iterate on the design through dialogue until the user is satisfied.
+4. Write the design doc to `session-history/${SESSION_ID}/01-design-doc.md` and `docs/designs/YYYY-MM-DD-${TOPIC}-design.md`.
+5. Commit: `design(${TOPIC}): brainstorm complete`
+
+**The design doc is the handoff point.** It must capture every decision so that Phase 2 agents can work without asking the user anything.
+
+### 3. Phase 2 — Autonomous Build
+
+Once the design doc is committed, run the remaining stages as Task agents. For each stage, spawn a fresh Task agent with: the sub-skill doc path (for the agent to read) + the input file paths.
+
+**Stage 2 — Validate Scope:** Spawn Task agent → reads `references/sub-skills/scope-validator.md` + design doc. Checks scope against heuristics, may split into multiple design docs.
 - Output: `session-history/${SESSION_ID}/02-scope-validation.md`
 - Commit: `design(${TOPIC}): scope validated`
 
-**Stages 3-5 — Plan (parallel):** Launch **3 Task agents in a single message** — all read the design doc, each produces a different plan:
-- `references/sub-skills/unit-test-planner.md` → `session-history/${SESSION_ID}/03-unit-test-plan.md`
-- `references/sub-skills/e2e-test-planner.md` → `session-history/${SESSION_ID}/04-e2e-test-plan.md`
-- `references/sub-skills/feature-planner.md` → `session-history/${SESSION_ID}/05-feature-plan.md`
+**Stages 3-5 — Plan (parallel):** Launch **3 Task agents in a single message:**
+- Agent 1 → reads `references/sub-skills/unit-test-planner.md` + design doc → `session-history/${SESSION_ID}/03-unit-test-plan.md`
+- Agent 2 → reads `references/sub-skills/e2e-test-planner.md` + design doc → `session-history/${SESSION_ID}/04-e2e-test-plan.md`
+- Agent 3 → reads `references/sub-skills/feature-planner.md` + design doc → `session-history/${SESSION_ID}/05-feature-plan.md`
 - Commit: `plan(${TOPIC}): all plans generated`
 
-**Stage 6 — Cross-Check:** Read `references/sub-skills/plan-reviewer.md`. Spawn Task agent with all 3 plans + design doc. Agent finds gaps, inconsistencies, patches the plans.
+**Stage 6 — Cross-Check:** Spawn Task agent → reads `references/sub-skills/plan-reviewer.md` + all 3 plans + design doc. Finds gaps, inconsistencies, patches the plans.
 - Output: `session-history/${SESSION_ID}/06-cross-check-report.md`
 - Commit: `plan(${TOPIC}): cross-check complete`
 
-**Stage 7a — Implement Unit Tests:** Read `references/sub-skills/test-implementer.md`. Spawn Task agent with unit test plan. Agent writes tests that **must fail** (feature doesn't exist yet). Run the test command to confirm failure.
+**Stage 7a — Implement Unit Tests:** Spawn Task agent → reads `references/sub-skills/test-implementer.md` + unit test plan. Writes tests that **must fail** (feature doesn't exist yet). Run test command to confirm failure.
 - Commit: `test(${TOPIC}): unit tests implemented (failing)`
 
-**Stage 7b — Implement E2E Tests:** Same sub-skill, spawn Task agent with e2e test plan. Tests **must fail**.
+**Stage 7b — Implement E2E Tests:** Spawn Task agent → same sub-skill + e2e test plan. Tests **must fail**.
 - Commit: `test(${TOPIC}): e2e tests implemented (failing)`
 
-**Stage 7c — Implement Feature:** Read `references/sub-skills/feature-implementer.md`. Spawn Task agent with feature plan + design doc + test files (so it knows what to satisfy).
+**Stage 7c — Implement Feature:** Spawn Task agent → reads `references/sub-skills/feature-implementer.md` + feature plan + design doc + test files (so it knows what to satisfy).
 - Commit: `feat(${TOPIC}): feature implemented`
 
-**Stage 7d — Verify Unit Tests:** Read `references/sub-skills/test-verifier.md`. Run unit tests. If they fail, apply retry logic (see below).
+**Stage 7d — Verify Unit Tests:** Spawn Task agent → reads `references/sub-skills/test-verifier.md`. Runs unit tests. If they fail, apply retry logic (see below).
 - Commit: `test(${TOPIC}): unit tests passing`
 
-**Stage 7e — Verify E2E Tests:** Same sub-skill for e2e. Run e2e tests. Apply retry logic if needed.
+**Stage 7e — Verify E2E Tests:** Spawn Task agent → same sub-skill for e2e. Runs e2e tests. Apply retry logic if needed.
 - Commit: `test(${TOPIC}): e2e tests passing`
 
-**Stage 7f — Verify Design Compliance:** Read `references/sub-skills/design-compliance-checker.md`. Spawn Task agent with design doc + all implementations. Agent checks every acceptance criterion.
+**Stage 7f — Verify Design Compliance:** Spawn Task agent → reads `references/sub-skills/design-compliance-checker.md` + design doc + all implementations. Checks every acceptance criterion.
 - Output: `session-history/${SESSION_ID}/09-design-compliance.md`
 - Commit: `verify(${TOPIC}): design compliance confirmed`
 
-**Stage 8 — Final Review:** Read `references/sub-skills/review-compiler.md`. Spawn Task agent with all artifacts. Agent produces human handoff notes.
+**Stage 8 — Final Review:** Spawn Task agent → reads `references/sub-skills/review-compiler.md` + all artifacts. Produces human handoff notes.
 - Output: `session-history/${SESSION_ID}/10-review-notes.md`
 
-### 3. Finalise
+### 4. Finalise
 
 **On success** — merge and clean up:
 ```bash
@@ -144,19 +184,19 @@ session-history/${SESSION_ID}/
 
 ## Sub-Skill Reference
 
-| Sub-Skill | Input | Output |
-|-----------|-------|--------|
-| `brainstormer` | User idea + project context | design-doc.md |
-| `scope-validator` | design-doc.md | validated/split docs |
-| `unit-test-planner` | design-doc.md | unit-test-plan.md |
-| `e2e-test-planner` | design-doc.md | e2e-test-plan.md |
-| `feature-planner` | design-doc.md | feature-plan.md |
-| `plan-reviewer` | All 3 plans + design doc | patched plans |
-| `test-implementer` | test-plan.md | test files (failing) |
-| `feature-implementer` | feature-plan.md | feature code |
-| `test-verifier` | test files + code | pass/fail + fixes |
-| `systematic-debugger` | failing tests + errors | debugging-report.md |
-| `design-compliance-checker` | design doc + all code | compliance-report.md |
-| `review-compiler` | all artifacts | review-notes.md |
+| Sub-Skill | Runs In | Input | Output |
+|-----------|---------|-------|--------|
+| `brainstormer` | **Main context** | User idea + project context | design-doc.md |
+| `scope-validator` | Task agent | design-doc.md | validated/split docs |
+| `unit-test-planner` | Task agent | design-doc.md | unit-test-plan.md |
+| `e2e-test-planner` | Task agent | design-doc.md | e2e-test-plan.md |
+| `feature-planner` | Task agent | design-doc.md | feature-plan.md |
+| `plan-reviewer` | Task agent | All 3 plans + design doc | patched plans |
+| `test-implementer` | Task agent | test-plan.md | test files (failing) |
+| `feature-implementer` | Task agent | feature-plan.md | feature code |
+| `test-verifier` | Task agent | test files + code | pass/fail + fixes |
+| `systematic-debugger` | Task agent | failing tests + errors | debugging-report.md |
+| `design-compliance-checker` | Task agent | design doc + all code | compliance-report.md |
+| `review-compiler` | Task agent | all artifacts | review-notes.md |
 
 All sub-skill docs live in `references/sub-skills/`.
