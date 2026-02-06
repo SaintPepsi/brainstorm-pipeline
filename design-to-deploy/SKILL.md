@@ -9,141 +9,112 @@ Automate the journey from rough idea to verified, tested implementation using co
 
 ## Core Principle: Context Isolation
 
-Each pipeline stage runs in a **fresh agent context** (via the Task tool) with:
-- Specific input files only (design docs, plans)
-- Clear output requirements
-- Artifacts passed via filesystem, not accumulated context
+Each pipeline stage runs in a **fresh agent context** (via the Task tool) with only the specific input files it needs. Artifacts pass via filesystem, not accumulated context. This prevents context pollution across stages.
 
-## Quick Start
-
-1. Copy `assets/design-to-deploy.yml.example` to `.design-to-deploy.yml` in the project root
-2. Customise test frameworks, paths, and validation limits
-3. Run the pipeline (see "Running the Pipeline" below)
-
-## Pipeline Overview
+## Pipeline
 
 ```
 BRAINSTORM -> VALIDATE SCOPE -> [PLAN UNIT | PLAN E2E | PLAN FEATURE] -> CROSS-CHECK
     -> IMPL TESTS (failing) -> IMPL FEATURE -> VERIFY TESTS -> VERIFY DESIGN -> REVIEW
 ```
 
-### Stage Details
+## How to Run
 
-**Stage 1: Brainstorm** — Transform rough idea into structured design doc
-- Prompt: `references/prompts/brainstorm.md`
-- Sub-skill: `references/sub-skills/brainstormer.md`
-- Output: `{session}/01-design-doc.md` + `docs/designs/YYYY-MM-DD-{topic}-design.md`
+### 1. Set Up Worktree
 
-**Stage 2: Validate & Split** — Check scope, split if too large
-- Prompt: `references/prompts/validate-scope.md`
-- Sub-skill: `references/sub-skills/scope-validator.md`
-- Output: `{session}/02-scope-validation.md` (may produce split design docs)
-
-**Stages 3-5: Parallel Planning** — Run 3 agents simultaneously via Task tool
-- Unit test plan: `references/sub-skills/unit-test-planner.md`
-- E2E test plan: `references/sub-skills/e2e-test-planner.md`
-- Feature plan: `references/sub-skills/feature-planner.md`
-
-**Stage 6: Cross-Check** — Verify consistency across all 3 plans
-- Sub-skill: `references/sub-skills/plan-reviewer.md`
-- Output: `{session}/06-cross-check-report.md` + patched plans
-
-**Stage 7: Implementation Sub-Pipeline**
-1. Implement unit tests (must fail) — `references/sub-skills/test-implementer.md`
-2. Implement e2e tests (must fail) — same sub-skill, TEST_TYPE=e2e
-3. Implement feature — `references/sub-skills/feature-implementer.md`
-4. Verify unit tests pass — `references/sub-skills/test-verifier.md`
-5. Verify e2e tests pass — same sub-skill
-6. Verify design compliance — `references/sub-skills/design-compliance-checker.md`
-
-**Stage 8: Final Review** — Human handoff notes
-- Sub-skill: `references/sub-skills/review-compiler.md`
-- Output: `{session}/10-review-notes.md`
-
-## Running the Pipeline
-
-### Step 1: Initialise
+Create an isolated branch for the pipeline. All work happens here — main stays clean.
 
 ```bash
-TOPIC="my-feature"
+TOPIC="my-feature"  # kebab-case, derived from the idea
 SESSION_ID=$(date +%Y-%m-%d-%H-%M)-${TOPIC}
-SESSION_DIR="session-history/${SESSION_ID}"
 
-git worktree add ../worktrees/${SESSION_ID} -b feature/${TOPIC}
-cd ../worktrees/${SESSION_ID}
-mkdir -p ${SESSION_DIR}/08-test-results/screenshots
+git worktree add .worktrees/${SESSION_ID} -b feature/${TOPIC}
+cd .worktrees/${SESSION_ID}
+mkdir -p session-history/${SESSION_ID}/08-test-results/screenshots
 ```
 
-### Step 2: Execute Stages
+### 2. Run Each Stage
 
-For each stage, spawn a fresh agent using the Task tool:
+For each stage, read the sub-skill doc, then spawn a **fresh Task agent** with the relevant context. Commit after each stage completes.
 
-```
-Task(subagent_type="general-purpose", prompt=<contents of prompt template with placeholders filled>)
-```
+**Stage 1 — Brainstorm:** Read `references/sub-skills/brainstormer.md`. Spawn Task agent with user's idea + project context. Agent explores the codebase and produces a design doc.
+- Output: `session-history/${SESSION_ID}/01-design-doc.md` + `docs/designs/YYYY-MM-DD-${TOPIC}-design.md`
+- Commit: `design(${TOPIC}): brainstorm complete`
 
-Read the appropriate prompt template from `references/prompts/`, substitute `{{PLACEHOLDERS}}`, and pass to a Task agent. The agent reads the sub-skill reference for detailed instructions.
+**Stage 2 — Validate Scope:** Read `references/sub-skills/scope-validator.md`. Spawn Task agent with the design doc. Agent checks scope against heuristics, may split into multiple design docs.
+- Output: `session-history/${SESSION_ID}/02-scope-validation.md`
+- Commit: `design(${TOPIC}): scope validated`
 
-**Parallel stages (3-5):** Launch all 3 Task agents in a single message block.
+**Stages 3-5 — Plan (parallel):** Launch **3 Task agents in a single message** — all read the design doc, each produces a different plan:
+- `references/sub-skills/unit-test-planner.md` → `session-history/${SESSION_ID}/03-unit-test-plan.md`
+- `references/sub-skills/e2e-test-planner.md` → `session-history/${SESSION_ID}/04-e2e-test-plan.md`
+- `references/sub-skills/feature-planner.md` → `session-history/${SESSION_ID}/05-feature-plan.md`
+- Commit: `plan(${TOPIC}): all plans generated`
 
-### Step 3: Commit After Each Stage
+**Stage 6 — Cross-Check:** Read `references/sub-skills/plan-reviewer.md`. Spawn Task agent with all 3 plans + design doc. Agent finds gaps, inconsistencies, patches the plans.
+- Output: `session-history/${SESSION_ID}/06-cross-check-report.md`
+- Commit: `plan(${TOPIC}): cross-check complete`
 
+**Stage 7a — Implement Unit Tests:** Read `references/sub-skills/test-implementer.md`. Spawn Task agent with unit test plan. Agent writes tests that **must fail** (feature doesn't exist yet). Run the test command to confirm failure.
+- Commit: `test(${TOPIC}): unit tests implemented (failing)`
+
+**Stage 7b — Implement E2E Tests:** Same sub-skill, spawn Task agent with e2e test plan. Tests **must fail**.
+- Commit: `test(${TOPIC}): e2e tests implemented (failing)`
+
+**Stage 7c — Implement Feature:** Read `references/sub-skills/feature-implementer.md`. Spawn Task agent with feature plan + design doc + test files (so it knows what to satisfy).
+- Commit: `feat(${TOPIC}): feature implemented`
+
+**Stage 7d — Verify Unit Tests:** Read `references/sub-skills/test-verifier.md`. Run unit tests. If they fail, apply retry logic (see below).
+- Commit: `test(${TOPIC}): unit tests passing`
+
+**Stage 7e — Verify E2E Tests:** Same sub-skill for e2e. Run e2e tests. Apply retry logic if needed.
+- Commit: `test(${TOPIC}): e2e tests passing`
+
+**Stage 7f — Verify Design Compliance:** Read `references/sub-skills/design-compliance-checker.md`. Spawn Task agent with design doc + all implementations. Agent checks every acceptance criterion.
+- Output: `session-history/${SESSION_ID}/09-design-compliance.md`
+- Commit: `verify(${TOPIC}): design compliance confirmed`
+
+**Stage 8 — Final Review:** Read `references/sub-skills/review-compiler.md`. Spawn Task agent with all artifacts. Agent produces human handoff notes.
+- Output: `session-history/${SESSION_ID}/10-review-notes.md`
+
+### 3. Finalise
+
+**On success** — merge and clean up:
 ```bash
-git add . && git commit -m "design(${TOPIC}): brainstorm complete"
-git add . && git commit -m "design(${TOPIC}): scope validated"
-git add . && git commit -m "plan(${TOPIC}): all plans generated"
-git add . && git commit -m "plan(${TOPIC}): cross-check complete"
-git add . && git commit -m "test(${TOPIC}): unit tests implemented (failing)"
-git add . && git commit -m "test(${TOPIC}): e2e tests implemented (failing)"
-git add . && git commit -m "feat(${TOPIC}): feature implemented"
-git add . && git commit -m "test(${TOPIC}): unit tests passing"
-git add . && git commit -m "test(${TOPIC}): e2e tests passing"
-git add . && git commit -m "verify(${TOPIC}): design compliance confirmed"
-```
-
-### Step 4: Finalise
-
-On success:
-```bash
-cd ../{project-root}
+cd ../../  # back to project root
 git merge feature/${TOPIC}
-git worktree remove ../worktrees/${SESSION_ID}
+git worktree remove .worktrees/${SESSION_ID}
 ```
 
-On failure — preserve worktree for human review:
-```bash
-echo "Worktree preserved at: ../worktrees/${SESSION_ID}"
-echo "Resume: cd ../worktrees/${SESSION_ID}"
-echo "Abandon: git worktree remove ../worktrees/${SESSION_ID} --force"
+**On failure** — preserve for human review:
+```
+Pipeline failed at stage: {STAGE}
+Worktree preserved at: .worktrees/${SESSION_ID}
+To resume: cd .worktrees/${SESSION_ID}
+To abandon: git worktree remove .worktrees/${SESSION_ID} --force
 ```
 
 ## Test Verification Retry Logic
 
-When tests fail during verification (stages VERIFY_UNIT_TESTS or VERIFY_E2E_TESTS):
+When tests fail during verification:
 
 1. **Attempt 1-2**: Fix within the test-verifier agent context
-2. **Attempt 3**: Invoke systematic debugging — read `references/sub-skills/systematic-debugger.md`
-3. **Attempt 4+**: **STOP PIPELINE** — generate failure report, preserve worktree
+2. **Attempt 3**: Spawn a new Task agent using `references/sub-skills/systematic-debugger.md` — 4-phase methodology: root cause investigation, pattern analysis, hypothesis testing, implementation
+3. **Attempt 4+**: **STOP PIPELINE** — write a failure report to session history, preserve worktree, tell the user what failed and why
 
-The systematic debugger follows a strict 4-phase methodology:
-1. Root cause investigation (no fixes without understanding)
-2. Pattern analysis (compare to working code)
-3. Hypothesis testing (one change at a time)
-4. Implementation (fix root cause, not symptoms)
-
-**Red flags that trigger STOP**: "quick fix", multiple changes at once, 3+ failed attempts.
+**Red flags that trigger immediate STOP**: "quick fix for now", multiple changes at once, 3+ failed attempts without clear progress.
 
 ## Scope Validation Heuristics
 
-The scope validator flags for splitting when:
-- Estimated files to create: > 10
-- Estimated files to modify: > 15
-- Estimated implementation time: > 4 hours
-- Distinct feature areas: > 3
-- External API integrations: > 2
-- New database tables: > 3
+Flag for splitting when any of these are true:
+- Estimated files to create > 10
+- Estimated files to modify > 15
+- Estimated implementation time > 4 hours
+- Distinct feature areas > 3
+- External API integrations > 2
+- New database tables > 3
 
-Design docs must include a Scope Declaration section:
+Design docs must include:
 ```markdown
 ## Scope Declaration
 - Type: [atomic-feature | multi-feature | epic]
@@ -152,11 +123,10 @@ Design docs must include a Scope Declaration section:
 - Can Be Split: [yes | no]
 ```
 
-## Session History Structure
+## Session History
 
 ```
-session-history/{SESSION_ID}/
-  00-brainstorm-transcript.md
+session-history/${SESSION_ID}/
   01-design-doc.md
   02-scope-validation.md
   03-unit-test-plan.md
@@ -172,28 +142,6 @@ session-history/{SESSION_ID}/
   10-review-notes.md
 ```
 
-## Configuration
-
-Copy `assets/design-to-deploy.yml.example` to `.design-to-deploy.yml` in your project root. Key settings:
-
-- `testing.unit.command` — command to run unit tests (e.g., `npx vitest run`)
-- `testing.e2e.command` — command to run e2e tests (e.g., `npx playwright test`)
-- `validation.max_files_to_create` — scope limit trigger
-- `validation.max_implementation_hours` — time limit trigger
-
-## Orchestrator Script
-
-`scripts/orchestrator.ts` provides programmatic pipeline management:
-- Git worktree lifecycle (create, commit, merge, cleanup)
-- Pipeline state persistence (`pipeline-state.json`)
-- Test retry logic with escalation
-- Resume from failed state (`--resume` flag)
-- Failure report generation
-
-Usage: `ts-node scripts/orchestrator.ts --idea "description" [--config path] [--resume]`
-
-Type definitions: `scripts/types.ts`
-
 ## Sub-Skill Reference
 
 | Sub-Skill | Input | Output |
@@ -203,13 +151,12 @@ Type definitions: `scripts/types.ts`
 | `unit-test-planner` | design-doc.md | unit-test-plan.md |
 | `e2e-test-planner` | design-doc.md | e2e-test-plan.md |
 | `feature-planner` | design-doc.md | feature-plan.md |
-| `plan-reviewer` | All 3 plans + design doc | Patched plans |
-| `test-implementer` | test-plan.md | Test files (failing) |
-| `feature-implementer` | feature-plan.md | Feature code |
-| `test-verifier` | Test files + code | Pass/fail + fixes |
-| `systematic-debugger` | Failing tests + errors | debugging-report.md |
-| `design-compliance-checker` | Design doc + all code | compliance-report.md |
-| `review-compiler` | All artifacts | review-notes.md |
+| `plan-reviewer` | All 3 plans + design doc | patched plans |
+| `test-implementer` | test-plan.md | test files (failing) |
+| `feature-implementer` | feature-plan.md | feature code |
+| `test-verifier` | test files + code | pass/fail + fixes |
+| `systematic-debugger` | failing tests + errors | debugging-report.md |
+| `design-compliance-checker` | design doc + all code | compliance-report.md |
+| `review-compiler` | all artifacts | review-notes.md |
 
-All sub-skill docs: `references/sub-skills/`
-All prompt templates: `references/prompts/`
+All sub-skill docs live in `references/sub-skills/`.
