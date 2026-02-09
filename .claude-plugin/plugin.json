@@ -1,0 +1,19 @@
+{
+  "name": "brainstorm-pipeline",
+  "description": "Multi-agent pipeline skills for Claude Code: design-to-deploy automation, session token analysis, and development workflow tools",
+  "version": "1.0.0",
+  "author": {
+    "name": "SaintPepsi"
+  },
+  "repository": "https://github.com/SaintPepsi/brainstorm-pipeline",
+  "license": "MIT",
+  "keywords": [
+    "pipeline",
+    "design-to-deploy",
+    "token-analysis",
+    "multi-agent",
+    "tdd",
+    "automation",
+    "workflow"
+  ]
+}
