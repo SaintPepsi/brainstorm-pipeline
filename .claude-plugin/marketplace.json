@@ -1,0 +1,22 @@
+{
+  "name": "brainstorm-pipeline-marketplace",
+  "owner": {
+    "name": "SaintPepsi"
+  },
+  "metadata": {
+    "description": "Multi-agent pipeline skills: design automation, token analysis, and development workflows",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "brainstorm-pipeline",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/SaintPepsi/brainstorm-pipeline.git"
+      },
+      "description": "Multi-agent pipeline skills: design-to-deploy automation, session token analysis, and workflow tools",
+      "version": "1.0.0",
+      "strict": true
+    }
+  ]
+}
