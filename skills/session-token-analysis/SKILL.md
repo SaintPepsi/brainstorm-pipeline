@@ -5,6 +5,7 @@ allowed-tools:
   - Bash
   - Read
   - Task
+user-invocable: true
 argument-hint: "[number-of-sessions]"
 ---
 
@@ -48,19 +49,19 @@ python3 skills/session-token-analysis/scripts/analyze_sessions.py --file ~/.clau
 
 ### Per-Session Metrics
 
-| Metric | Description |
-|--------|-------------|
-| Session overview | Start time, end time, duration, model, project directory |
-| Effective input | cache_read + cache_creation + uncached input (real context processed) |
-| Token breakdown | Cache read, cache creation, uncached input shown separately with cost weighting |
-| Estimated cost | Per-category cost breakdown using model-specific API pricing |
-| Cache hit rate | cache_read / effective_input * 100 |
-| Turn count | Number of assistant messages (API calls) |
-| Avg context/turn | Average effective input per turn (real context window size) |
-| Tool use count | Content blocks with type: "tool_use" |
-| Tool-to-turn ratio | Tool uses / turns |
-| Context growth curve | Effective input at 1st, middle, and last turn + peak context and peak turn |
-| Compaction events | Detected auto-compaction (>50% context drop between consecutive turns) |
+| Metric               | Description                                                                     |
+| -------------------- | ------------------------------------------------------------------------------- |
+| Session overview     | Start time, end time, duration, model, project directory                        |
+| Effective input      | cache_read + cache_creation + uncached input (real context processed)           |
+| Token breakdown      | Cache read, cache creation, uncached input shown separately with cost weighting |
+| Estimated cost       | Per-category cost breakdown using model-specific API pricing                    |
+| Cache hit rate       | cache_read / effective_input \* 100                                             |
+| Turn count           | Number of assistant messages (API calls)                                        |
+| Avg context/turn     | Average effective input per turn (real context window size)                     |
+| Tool use count       | Content blocks with type: "tool_use"                                            |
+| Tool-to-turn ratio   | Tool uses / turns                                                               |
+| Context growth curve | Effective input at 1st, middle, and last turn + peak context and peak turn      |
+| Compaction events    | Detected auto-compaction (>50% context drop between consecutive turns)          |
 
 ### Cross-Session Comparison
 
@@ -102,6 +103,7 @@ Detected when effective input drops by more than 50% between consecutive turns. 
 ### Estimated Cost
 
 Calculated using model-specific API pricing (auto-detected from session logs):
+
 - **Opus 4:** $15/M input, $75/M output, $18.75/M cache write, $1.875/M cache read
 - **Sonnet 4.5:** $3/M input, $15/M output, $3.75/M cache write, $0.30/M cache read
 - **Haiku 4.5:** $0.80/M input, $4/M output, $1/M cache write, $0.08/M cache read

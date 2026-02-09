@@ -1,6 +1,7 @@
 ---
 name: design-to-deploy
 description: "Recursive multi-agent pipeline that automates idea to design to implementation to verified tests. Each stage spawns a fresh-context agent with specific inputs/outputs, passing artifacts via filesystem. Manages git worktrees, conventional commits, test verification with retry logic, and failure escalation. TRIGGERS: design-to-deploy, brainstorm and build, implement this idea end-to-end, full pipeline, idea to implementation, design and implement."
+user-invocable: true
 ---
 
 # Design-to-Deploy Pipeline
@@ -23,18 +24,18 @@ Running a full pipeline on Opus can easily exceed $30. Most of that cost comes f
 
 Not every stage needs Opus. Use the `model` parameter on Task agents:
 
-| Stage | Recommended Model | Why |
-|-------|-------------------|-----|
-| Phase 1 brainstorm | User's current model | Interactive, benefits from strong reasoning |
-| Scope validation | `haiku` | Checklist-based, low complexity |
-| Test/feature planning | `sonnet` | Structured output from a design doc |
-| Cross-check review | `sonnet` | Comparison and gap analysis |
-| Test implementation | `sonnet` | Translating plans to code |
-| Feature implementation | `sonnet` (or `opus` for complex logic) | Code generation from a clear plan |
-| Test verification | `sonnet` | Running tests, reading output |
-| Systematic debugger | `opus` | Complex reasoning about failures |
-| Design compliance | `sonnet` | Checklist verification |
-| Final review | `haiku` | Summarisation task |
+| Stage                  | Recommended Model                      | Why                                         |
+| ---------------------- | -------------------------------------- | ------------------------------------------- |
+| Phase 1 brainstorm     | User's current model                   | Interactive, benefits from strong reasoning |
+| Scope validation       | `haiku`                                | Checklist-based, low complexity             |
+| Test/feature planning  | `sonnet`                               | Structured output from a design doc         |
+| Cross-check review     | `sonnet`                               | Comparison and gap analysis                 |
+| Test implementation    | `sonnet`                               | Translating plans to code                   |
+| Feature implementation | `sonnet` (or `opus` for complex logic) | Code generation from a clear plan           |
+| Test verification      | `sonnet`                               | Running tests, reading output               |
+| Systematic debugger    | `opus`                                 | Complex reasoning about failures            |
+| Design compliance      | `sonnet`                               | Checklist verification                      |
+| Final review           | `haiku`                                | Summarisation task                          |
 
 ### Compaction Checkpoints
 
@@ -47,6 +48,7 @@ Run `/compact` at these points to prevent context bloat in the orchestrator:
 ### Turn Budget
 
 Aim for these approximate turn counts per phase:
+
 - Phase 1 brainstorm: 15-30 turns (batch questions, avoid single-question turns)
 - Phase 2 orchestration: 20-30 turns (launch agents, collect results, commit)
 - Each sub-agent: 10-30 turns depending on complexity
@@ -60,6 +62,7 @@ If the orchestrator exceeds 60 turns or context exceeds 80K tokens, something is
 3. **Artifacts pass via filesystem.** Each stage writes its output to `session-history/`, and the next stage reads from there.
 
 Bad (pollutes your context):
+
 ```
 # DON'T do this
 Read references/sub-skills/scope-validator.md   ← you're reading it yourself
@@ -67,6 +70,7 @@ Then spawn Task agent with the content
 ```
 
 Good (context stays clean):
+
 ```
 # DO this
 Spawn Task agent with prompt:
@@ -120,10 +124,12 @@ Read `references/sub-skills/brainstormer.md` for the brainstorm process. Then ha
 Once the design doc is committed, **run `/compact` to clear the brainstorm conversation from context**, then run the remaining stages as Task agents. For each stage, spawn a fresh Task agent with: the sub-skill doc path (for the agent to read) + the input file paths + the recommended model.
 
 **Stage 2 — Validate Scope:** Spawn Task agent (model: `haiku`) → reads `references/sub-skills/scope-validator.md` + design doc. Checks scope against heuristics, may split into multiple design docs.
+
 - Output: `session-history/${SESSION_ID}/02-scope-validation.md`
 - Commit: `design(${TOPIC}): scope validated`
 
 **Stages 3-5 — Plan (parallel):** Launch **3 Task agents in a single message** (model: `sonnet`):
+
 - Agent 1 → reads `references/sub-skills/unit-test-planner.md` + design doc → `session-history/${SESSION_ID}/03-unit-test-plan.md`
 - Agent 2 → reads `references/sub-skills/e2e-test-planner.md` + design doc → `session-history/${SESSION_ID}/04-e2e-test-plan.md`
 - Agent 3 → reads `references/sub-skills/feature-planner.md` + design doc → `session-history/${SESSION_ID}/05-feature-plan.md`
@@ -131,35 +137,44 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 - **Run `/compact` after collecting results**
 
 **Stage 6 — Cross-Check:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/plan-reviewer.md` + all 3 plans + design doc. Finds gaps, inconsistencies, patches the plans.
+
 - Output: `session-history/${SESSION_ID}/06-cross-check-report.md`
 - Commit: `plan(${TOPIC}): cross-check complete`
 
 **Stage 7a — Implement Unit Tests:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-implementer.md` + unit test plan. Writes tests that **must fail** (feature doesn't exist yet). Run test command to confirm failure.
+
 - Commit: `test(${TOPIC}): unit tests implemented (failing)`
 
 **Stage 7b — Implement E2E Tests:** Spawn Task agent (model: `sonnet`) → same sub-skill + e2e test plan. Tests **must fail**.
+
 - Commit: `test(${TOPIC}): e2e tests implemented (failing)`
 
 **Stage 7c — Implement Feature:** Spawn Task agent (model: `sonnet`, or `opus` for complex logic) → reads `references/sub-skills/feature-implementer.md` + feature plan + design doc + test files (so it knows what to satisfy).
+
 - Commit: `feat(${TOPIC}): feature implemented`
 - **Run `/compact` after implementation completes**
 
 **Stage 7d — Verify Unit Tests:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-verifier.md`. Runs unit tests. If they fail, apply retry logic (see below).
+
 - Commit: `test(${TOPIC}): unit tests passing`
 
 **Stage 7e — Verify E2E Tests:** Spawn Task agent (model: `sonnet`) → same sub-skill for e2e. Runs e2e tests. Apply retry logic if needed.
+
 - Commit: `test(${TOPIC}): e2e tests passing`
 
 **Stage 7f — Verify Design Compliance:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/design-compliance-checker.md` + design doc + all implementations. Checks every acceptance criterion.
+
 - Output: `session-history/${SESSION_ID}/09-design-compliance.md`
 - Commit: `verify(${TOPIC}): design compliance confirmed`
 
 **Stage 8 — Final Review:** Spawn Task agent (model: `haiku`) → reads `references/sub-skills/review-compiler.md` + all artifacts. Produces human handoff notes.
+
 - Output: `session-history/${SESSION_ID}/10-review-notes.md`
 
 ### 4. Finalise
 
 **On success** — merge and clean up:
+
 ```bash
 cd ../../  # back to project root
 git merge feature/${TOPIC}
@@ -167,6 +182,7 @@ git worktree remove .worktrees/${SESSION_ID}
 ```
 
 **On failure** — preserve for human review:
+
 ```
 Pipeline failed at stage: {STAGE}
 Worktree preserved at: .worktrees/${SESSION_ID}
@@ -187,6 +203,7 @@ When tests fail during verification:
 ## Scope Validation Heuristics
 
 Flag for splitting when any of these are true:
+
 - Estimated files to create > 10
 - Estimated files to modify > 15
 - Estimated implementation time > 4 hours
@@ -195,8 +212,10 @@ Flag for splitting when any of these are true:
 - New database tables > 3
 
 Design docs must include:
+
 ```markdown
 ## Scope Declaration
+
 - Type: [atomic-feature | multi-feature | epic]
 - Estimated Complexity: [small | medium | large]
 - Dependencies: [list]
@@ -224,19 +243,19 @@ session-history/${SESSION_ID}/
 
 ## Sub-Skill Reference
 
-| Sub-Skill | Runs In | Input | Output |
-|-----------|---------|-------|--------|
-| `brainstormer` | **Main context** | User idea + project context | design-doc.md |
-| `scope-validator` | Task agent | design-doc.md | validated/split docs |
-| `unit-test-planner` | Task agent | design-doc.md | unit-test-plan.md |
-| `e2e-test-planner` | Task agent | design-doc.md | e2e-test-plan.md |
-| `feature-planner` | Task agent | design-doc.md | feature-plan.md |
-| `plan-reviewer` | Task agent | All 3 plans + design doc | patched plans |
-| `test-implementer` | Task agent | test-plan.md | test files (failing) |
-| `feature-implementer` | Task agent | feature-plan.md | feature code |
-| `test-verifier` | Task agent | test files + code | pass/fail + fixes |
-| `systematic-debugger` | Task agent | failing tests + errors | debugging-report.md |
-| `design-compliance-checker` | Task agent | design doc + all code | compliance-report.md |
-| `review-compiler` | Task agent | all artifacts | review-notes.md |
+| Sub-Skill                   | Runs In          | Input                       | Output               |
+| --------------------------- | ---------------- | --------------------------- | -------------------- |
+| `brainstormer`              | **Main context** | User idea + project context | design-doc.md        |
+| `scope-validator`           | Task agent       | design-doc.md               | validated/split docs |
+| `unit-test-planner`         | Task agent       | design-doc.md               | unit-test-plan.md    |
+| `e2e-test-planner`          | Task agent       | design-doc.md               | e2e-test-plan.md     |
+| `feature-planner`           | Task agent       | design-doc.md               | feature-plan.md      |
+| `plan-reviewer`             | Task agent       | All 3 plans + design doc    | patched plans        |
+| `test-implementer`          | Task agent       | test-plan.md                | test files (failing) |
+| `feature-implementer`       | Task agent       | feature-plan.md             | feature code         |
+| `test-verifier`             | Task agent       | test files + code           | pass/fail + fixes    |
+| `systematic-debugger`       | Task agent       | failing tests + errors      | debugging-report.md  |
+| `design-compliance-checker` | Task agent       | design doc + all code       | compliance-report.md |
+| `review-compiler`           | Task agent       | all artifacts               | review-notes.md      |
 
 All sub-skill docs live in `references/sub-skills/`.

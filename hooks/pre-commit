@@ -1,0 +1,47 @@
+#!/bin/bash
+# Pre-commit hook to optionally bump version
+# Checks if plugin files are being committed and prompts for version bump
+#
+# To install: cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Check if we're committing plugin-related files
+PLUGIN_FILES_CHANGED=$(git diff --cached --name-only | grep -E '(\.claude-plugin|skills|commands)/' || true)
+
+if [ -z "$PLUGIN_FILES_CHANGED" ]; then
+    # No plugin files changed, skip version bump
+    exit 0
+fi
+
+echo -e "${YELLOW}Plugin files detected in commit:${NC}"
+echo "$PLUGIN_FILES_CHANGED" | sed 's/^/  /'
+echo ""
+
+# Get current version
+CURRENT_VERSION=$(jq -r '.version' .claude-plugin/plugin.json 2>/dev/null || echo "unknown")
+echo -e "${BLUE}Current version: ${CURRENT_VERSION}${NC}"
+
+# Check for VERSION_BUMP environment variable to override default
+BUMP_TYPE="${VERSION_BUMP:-patch}"
+
+echo -e "${YELLOW}Auto-bumping version (${BUMP_TYPE})...${NC}"
+echo -e "${BLUE}Tip: Set VERSION_BUMP=minor or VERSION_BUMP=major to override${NC}"
+echo ""
+
+# Run bump script
+./scripts/bump-version.sh "$BUMP_TYPE"
+
+# Stage the updated version files
+git add .claude-plugin/plugin.json .claude-plugin/marketplace.json
+
+NEW_VERSION=$(jq -r '.version' .claude-plugin/plugin.json)
+echo -e "${GREEN}✓ Version bumped to ${NEW_VERSION} and staged${NC}"
+echo ""
