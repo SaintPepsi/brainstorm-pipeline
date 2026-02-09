@@ -3,4 +3,4 @@ description: "You MUST use this before - creating features, building components,
 disable-model-invocation: true
 ---
 
-Invoke the design-to-deploy skill and follow it exactly as presented to you
+Invoke the brainstorm-pipeline:design-to-deploy skill and follow it exactly as presented to you
