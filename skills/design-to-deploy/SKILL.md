@@ -15,6 +15,44 @@ The pipeline has two distinct phases with different execution models:
 
 **Phase 2 — Autonomous Build (sub-agents).** Once the design doc captures all decisions, the remaining stages run autonomously as Task agents. Each stage gets a fresh context with only the files it needs. No user interaction required.
 
+## Cost Management
+
+Running a full pipeline on Opus can easily exceed $30. Most of that cost comes from context re-processing across many turns, not from output generation. Follow these rules to keep costs under control:
+
+### Model Selection
+
+Not every stage needs Opus. Use the `model` parameter on Task agents:
+
+| Stage | Recommended Model | Why |
+|-------|-------------------|-----|
+| Phase 1 brainstorm | User's current model | Interactive, benefits from strong reasoning |
+| Scope validation | `haiku` | Checklist-based, low complexity |
+| Test/feature planning | `sonnet` | Structured output from a design doc |
+| Cross-check review | `sonnet` | Comparison and gap analysis |
+| Test implementation | `sonnet` | Translating plans to code |
+| Feature implementation | `sonnet` (or `opus` for complex logic) | Code generation from a clear plan |
+| Test verification | `sonnet` | Running tests, reading output |
+| Systematic debugger | `opus` | Complex reasoning about failures |
+| Design compliance | `sonnet` | Checklist verification |
+| Final review | `haiku` | Summarisation task |
+
+### Compaction Checkpoints
+
+Run `/compact` at these points to prevent context bloat in the orchestrator:
+
+1. **After Phase 1 completes** — the brainstorm conversation is no longer needed; the design doc captures everything.
+2. **After launching parallel planning agents** — while waiting for results, compact the orchestrator context.
+3. **Before the implementation stages** — context from planning results can be dropped once plans are written to disk.
+
+### Turn Budget
+
+Aim for these approximate turn counts per phase:
+- Phase 1 brainstorm: 15-30 turns (batch questions, avoid single-question turns)
+- Phase 2 orchestration: 20-30 turns (launch agents, collect results, commit)
+- Each sub-agent: 10-30 turns depending on complexity
+
+If the orchestrator exceeds 60 turns or context exceeds 80K tokens, something is wrong — compact or split.
+
 ## CRITICAL: Context Isolation Rules
 
 1. **Do NOT read sub-skill docs in your main context** (except `brainstormer.md` for Phase 1). When spawning Task agents for Phase 2, pass the sub-skill doc path in the prompt and let the Task agent read it.
@@ -79,42 +117,44 @@ Read `references/sub-skills/brainstormer.md` for the brainstorm process. Then ha
 
 ### 3. Phase 2 — Autonomous Build
 
-Once the design doc is committed, run the remaining stages as Task agents. For each stage, spawn a fresh Task agent with: the sub-skill doc path (for the agent to read) + the input file paths.
+Once the design doc is committed, **run `/compact` to clear the brainstorm conversation from context**, then run the remaining stages as Task agents. For each stage, spawn a fresh Task agent with: the sub-skill doc path (for the agent to read) + the input file paths + the recommended model.
 
-**Stage 2 — Validate Scope:** Spawn Task agent → reads `references/sub-skills/scope-validator.md` + design doc. Checks scope against heuristics, may split into multiple design docs.
+**Stage 2 — Validate Scope:** Spawn Task agent (model: `haiku`) → reads `references/sub-skills/scope-validator.md` + design doc. Checks scope against heuristics, may split into multiple design docs.
 - Output: `session-history/${SESSION_ID}/02-scope-validation.md`
 - Commit: `design(${TOPIC}): scope validated`
 
-**Stages 3-5 — Plan (parallel):** Launch **3 Task agents in a single message:**
+**Stages 3-5 — Plan (parallel):** Launch **3 Task agents in a single message** (model: `sonnet`):
 - Agent 1 → reads `references/sub-skills/unit-test-planner.md` + design doc → `session-history/${SESSION_ID}/03-unit-test-plan.md`
 - Agent 2 → reads `references/sub-skills/e2e-test-planner.md` + design doc → `session-history/${SESSION_ID}/04-e2e-test-plan.md`
 - Agent 3 → reads `references/sub-skills/feature-planner.md` + design doc → `session-history/${SESSION_ID}/05-feature-plan.md`
 - Commit: `plan(${TOPIC}): all plans generated`
+- **Run `/compact` after collecting results**
 
-**Stage 6 — Cross-Check:** Spawn Task agent → reads `references/sub-skills/plan-reviewer.md` + all 3 plans + design doc. Finds gaps, inconsistencies, patches the plans.
+**Stage 6 — Cross-Check:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/plan-reviewer.md` + all 3 plans + design doc. Finds gaps, inconsistencies, patches the plans.
 - Output: `session-history/${SESSION_ID}/06-cross-check-report.md`
 - Commit: `plan(${TOPIC}): cross-check complete`
 
-**Stage 7a — Implement Unit Tests:** Spawn Task agent → reads `references/sub-skills/test-implementer.md` + unit test plan. Writes tests that **must fail** (feature doesn't exist yet). Run test command to confirm failure.
+**Stage 7a — Implement Unit Tests:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-implementer.md` + unit test plan. Writes tests that **must fail** (feature doesn't exist yet). Run test command to confirm failure.
 - Commit: `test(${TOPIC}): unit tests implemented (failing)`
 
-**Stage 7b — Implement E2E Tests:** Spawn Task agent → same sub-skill + e2e test plan. Tests **must fail**.
+**Stage 7b — Implement E2E Tests:** Spawn Task agent (model: `sonnet`) → same sub-skill + e2e test plan. Tests **must fail**.
 - Commit: `test(${TOPIC}): e2e tests implemented (failing)`
 
-**Stage 7c — Implement Feature:** Spawn Task agent → reads `references/sub-skills/feature-implementer.md` + feature plan + design doc + test files (so it knows what to satisfy).
+**Stage 7c — Implement Feature:** Spawn Task agent (model: `sonnet`, or `opus` for complex logic) → reads `references/sub-skills/feature-implementer.md` + feature plan + design doc + test files (so it knows what to satisfy).
 - Commit: `feat(${TOPIC}): feature implemented`
+- **Run `/compact` after implementation completes**
 
-**Stage 7d — Verify Unit Tests:** Spawn Task agent → reads `references/sub-skills/test-verifier.md`. Runs unit tests. If they fail, apply retry logic (see below).
+**Stage 7d — Verify Unit Tests:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-verifier.md`. Runs unit tests. If they fail, apply retry logic (see below).
 - Commit: `test(${TOPIC}): unit tests passing`
 
-**Stage 7e — Verify E2E Tests:** Spawn Task agent → same sub-skill for e2e. Runs e2e tests. Apply retry logic if needed.
+**Stage 7e — Verify E2E Tests:** Spawn Task agent (model: `sonnet`) → same sub-skill for e2e. Runs e2e tests. Apply retry logic if needed.
 - Commit: `test(${TOPIC}): e2e tests passing`
 
-**Stage 7f — Verify Design Compliance:** Spawn Task agent → reads `references/sub-skills/design-compliance-checker.md` + design doc + all implementations. Checks every acceptance criterion.
+**Stage 7f — Verify Design Compliance:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/design-compliance-checker.md` + design doc + all implementations. Checks every acceptance criterion.
 - Output: `session-history/${SESSION_ID}/09-design-compliance.md`
 - Commit: `verify(${TOPIC}): design compliance confirmed`
 
-**Stage 8 — Final Review:** Spawn Task agent → reads `references/sub-skills/review-compiler.md` + all artifacts. Produces human handoff notes.
+**Stage 8 — Final Review:** Spawn Task agent (model: `haiku`) → reads `references/sub-skills/review-compiler.md` + all artifacts. Produces human handoff notes.
 - Output: `session-history/${SESSION_ID}/10-review-notes.md`
 
 ### 4. Finalise
@@ -138,8 +178,8 @@ To abandon: git worktree remove .worktrees/${SESSION_ID} --force
 
 When tests fail during verification:
 
-1. **Attempt 1-2**: Fix within the test-verifier agent context
-2. **Attempt 3**: Spawn a new Task agent using `references/sub-skills/systematic-debugger.md` — 4-phase methodology: root cause investigation, pattern analysis, hypothesis testing, implementation
+1. **Attempt 1-2**: Fix within the test-verifier agent context (model: `sonnet`)
+2. **Attempt 3**: Spawn a new Task agent (model: `opus`) using `references/sub-skills/systematic-debugger.md` — 4-phase methodology: root cause investigation, pattern analysis, hypothesis testing, implementation. This is where Opus earns its cost.
 3. **Attempt 4+**: **STOP PIPELINE** — write a failure report to session history, preserve worktree, tell the user what failed and why
 
 **Red flags that trigger immediate STOP**: "quick fix for now", multiple changes at once, 3+ failed attempts without clear progress.

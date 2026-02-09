@@ -3,6 +3,21 @@
 All notable changes to this skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-02-09
+
+### Added
+
+- Cost management section with model selection guidance, compaction checkpoints, and turn budgets
+- Model recommendations per pipeline stage (Haiku for checklist stages, Sonnet for most work, Opus for systematic debugging)
+- Explicit `/compact` checkpoints after Phase 1, after parallel planning, and after implementation
+- Turn budget guidance: 15–30 for brainstorm, 20–30 for orchestration, flag at 60 turns or 80K context
+
+### Changed
+
+- All Phase 2 stage descriptions now include recommended model tier
+- Retry logic specifies Sonnet for initial attempts, Opus for systematic debugger escalation
+- Phase 2 instructions now start with a `/compact` to clear brainstorm conversation from context
+
 ## [0.3.1] - 2026-02-06
 
 Added a usages folder to include version usage and success/fail conversations for reflection
