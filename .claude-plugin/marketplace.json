@@ -10,11 +10,7 @@
       "name": "brainstorm-pipeline",
       "source": "./",
       "description": "Multi-agent pipeline skills: design-to-deploy automation, session token analysis, and workflow tools",
-      "version": "1.0.1",
-      "owner": {
-        "name": "Ian Hogers",
-        "email": "info@ianhogers.com"
-      }
+      "version": "1.0.2"
     }
   ]
 }
