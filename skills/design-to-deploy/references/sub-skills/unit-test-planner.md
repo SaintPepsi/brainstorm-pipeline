@@ -64,6 +64,7 @@ For each module/component, specify:
 - Test runner command
 
 ## Guidelines
+- Follow DRY, SOLID, and YAGNI — plan shared test helpers/factories/fixtures, import production constants, never duplicate
 - Plan at least 2-3 tests per public function
 - Always include error cases (invalid input, null values, boundary conditions)
 - Edge cases: off-by-one, empty collections, max values, special characters

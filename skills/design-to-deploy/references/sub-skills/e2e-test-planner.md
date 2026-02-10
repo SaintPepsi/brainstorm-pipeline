@@ -81,6 +81,7 @@ tests/e2e/
 - Note any expected visual variations (responsive breakpoints)
 
 ## Guidelines
+- Follow DRY, SOLID, and YAGNI — plan shared page objects/helpers, import production constants, never duplicate
 - Plan 1-3 E2E tests per major user story
 - Always include a happy path journey
 - Cover at least one error case per feature

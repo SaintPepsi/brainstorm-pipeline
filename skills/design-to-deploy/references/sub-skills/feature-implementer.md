@@ -95,6 +95,7 @@ docs/implementation-reports/feature-implementation-report.md
 ```
 
 ## Guidelines
+- Follow DRY, SOLID, and YAGNI — import shared logic, never copy-paste it
 - Code as if tests are watching (because they are)
 - Don't skip steps—follow the plan order
 - If a step doesn't work, debug before moving to next

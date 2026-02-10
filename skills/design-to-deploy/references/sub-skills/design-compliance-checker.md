@@ -128,6 +128,7 @@ docs/compliance-reports/compliance-report.md
 ```
 
 ## Guidelines
+- Verify DRY, SOLID, and YAGNI compliance — flag duplicated logic, copy-pasted test setup, redefined constants, and SOLID violations
 - Be thorough—check every AC in design doc
 - Distinguish between "not implemented" and "implemented differently"
 - Deviations aren't necessarily bad—but they must be intentional and documented

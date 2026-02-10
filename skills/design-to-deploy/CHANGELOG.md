@@ -3,6 +3,13 @@
 All notable changes to this skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-02-10
+
+### Added
+
+- DRY, SOLID, and YAGNI as a concise top-level code quality principle in SKILL.md
+- One-liner DRY/SOLID/YAGNI guideline added to each relevant sub-skill (brainstormer, feature-planner, feature-implementer, unit-test-planner, e2e-test-planner, test-implementer, plan-reviewer, design-compliance-checker)
+
 ## [0.4.0] - 2026-02-09
 
 ### Added

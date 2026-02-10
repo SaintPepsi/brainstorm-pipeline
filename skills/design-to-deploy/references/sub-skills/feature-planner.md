@@ -94,6 +94,7 @@ For each major step, specify:
 - Breaking changes to existing code
 
 ## Guidelines
+- Follow DRY, SOLID, and YAGNI — import shared logic, never copy-paste it
 - Be concrete: show code, not abstractions
 - Reference existing patterns in the codebase
 - Keep steps small enough to implement and verify independently

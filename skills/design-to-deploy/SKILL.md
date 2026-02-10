@@ -8,6 +8,10 @@ user-invocable: true
 
 Automate the journey from rough idea to verified, tested implementation.
 
+## Code Quality: DRY, SOLID, YAGNI
+
+All pipeline stages — planning, implementation, and tests — must follow DRY, SOLID, and YAGNI principles. Import shared logic, never copy-paste it. If something exists in the codebase, use it. If it will be needed in more than one place, extract it into a shared module. Tests import production constants/types — never redefine them.
+
 ## Two Phases
 
 The pipeline has two distinct phases with different execution models:

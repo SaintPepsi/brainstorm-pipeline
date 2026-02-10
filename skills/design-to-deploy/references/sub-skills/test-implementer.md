@@ -91,6 +91,7 @@ Feature implementation should make these tests pass.
 ```
 
 ## Guidelines
+- Follow DRY, SOLID, and YAGNI — create shared helpers/factories first, import production constants, never copy-paste
 - Write tests that are easy to debug when they fail
 - Use descriptive test names: "should return X when given Y"
 - Avoid testing implementation details—test behavior

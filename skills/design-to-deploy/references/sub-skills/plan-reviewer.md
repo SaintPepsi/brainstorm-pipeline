@@ -96,6 +96,7 @@ docs/cross-check-report.md
 ```
 
 ## Guidelines
+- Flag DRY, SOLID, and YAGNI violations across plans — duplicated logic, missing shared modules, hardcoded values that should be imported
 - Be thorough—check every cross-reference
 - Consistency matters more than perfection
 - Gaps are better caught now than during implementation
