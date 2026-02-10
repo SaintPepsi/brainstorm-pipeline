@@ -2,7 +2,11 @@
 
 ## Execution Model
 
-**This stage runs as a Task agent (model: sonnet).** It receives a structured issue evaluation and produces a complete design document — no user interaction. This replaces the interactive brainstormer when requirements are already captured in a GitHub issue.
+**This stage runs as a Task agent (model: `sonnet` or `opus`).** It receives a structured issue evaluation and produces a complete design document — no user interaction. This replaces the interactive brainstormer when requirements are already captured in a GitHub issue.
+
+**Model selection:** Use `sonnet` by default. Escalate to `opus` when the issue evaluator flags:
+- Estimated scope as `large`, OR
+- Autonomy assessment as `yes-with-assumptions` with `high` assumption risk
 
 ## Purpose
 

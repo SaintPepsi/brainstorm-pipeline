@@ -123,7 +123,11 @@ Write output to session-history/${SESSION_ID}/00-issue-evaluation.md
 
 **This replaces the interactive brainstorm.** Instead of asking the user questions, the design-doc-writer explores the codebase and synthesises a design doc from the issue evaluation.
 
-Spawn a Task agent (model: `sonnet`) to read `references/sub-skills/design-doc-writer.md` and produce the design doc.
+**Model selection:** Read the issue evaluation's autonomy assessment and scope estimate:
+- **Default (`sonnet`)**: Scope is `small` or `medium`, autonomy is `yes` or `yes-with-assumptions` with `low`/`medium` risk
+- **Escalate (`opus`)**: Scope is `large`, OR autonomy is `yes-with-assumptions` with `high` assumption risk
+
+Spawn a Task agent with the selected model to read `references/sub-skills/design-doc-writer.md` and produce the design doc.
 
 **Agent prompt pattern:**
 ```
@@ -250,7 +254,7 @@ session-history/${SESSION_ID}/
 |-------|-------|-----|
 | Issue fetch | N/A | `gh` CLI calls, no LLM cost |
 | Issue evaluation | `haiku` | Classification — structured, low complexity |
-| Design doc writer | `sonnet` | Codebase exploration + doc synthesis |
+| Design doc writer | `sonnet` (or `opus` for large/risky scope) | Codebase exploration + doc synthesis |
 | Scope validation | `haiku` | Checklist-based |
 | Test/feature planning | `sonnet` | Structured output from design doc |
 | Cross-check | `sonnet` | Comparison and gap analysis |
@@ -275,7 +279,7 @@ Run `/compact` at these points:
 | Sub-Skill | Source | Runs In | Input | Output |
 |-----------|--------|---------|-------|--------|
 | `issue-evaluator` | This skill | Task agent (haiku) | Issue JSON data | issue-evaluation.md |
-| `design-doc-writer` | This skill | Task agent (sonnet) | issue-evaluation.md + codebase | design-doc.md |
+| `design-doc-writer` | This skill | Task agent (sonnet/opus) | issue-evaluation.md + codebase | design-doc.md |
 | `scope-validator` | design-to-deploy | Task agent (haiku) | design-doc.md | scope-validation.md |
 | `unit-test-planner` | design-to-deploy | Task agent (sonnet) | design-doc.md | unit-test-plan.md |
 | `e2e-test-planner` | design-to-deploy | Task agent (sonnet) | design-doc.md | e2e-test-plan.md |
