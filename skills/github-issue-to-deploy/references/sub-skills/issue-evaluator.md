@@ -6,7 +6,7 @@
 
 ## Purpose
 
-Transform raw GitHub issue content — title, body, comments, labels, and linked issues — into a structured evaluation that pre-seeds the design-to-deploy brainstorm phase. Extract requirements, acceptance criteria, and constraints so the brainstormer starts informed.
+Transform raw GitHub issue content — title, body, comments, labels, and linked issues — into a structured evaluation that feeds the autonomous design-doc-writer. Extract requirements, acceptance criteria, and constraints so the design doc can be generated without user interaction.
 
 ## Input
 
@@ -125,14 +125,19 @@ Write a structured evaluation to the path provided in your prompt (typically `se
 - <anything unclear or potentially problematic>
 - <questions the brainstormer should ask the user>
 
-## Suggested Brainstorm Focus
-<1-2 sentences on what the brainstormer should prioritise discussing with the user>
+## Autonomy Assessment
+- **Can this be built autonomously?** yes | yes-with-assumptions | needs-human-input
+- **Open question count:** <number>
+- **Assumption risk:** low | medium | high
+<If yes-with-assumptions, list the assumptions the design-doc-writer should make>
+<If needs-human-input, explain what's missing — the pipeline will warn the user>
 ```
 
 ## Guidelines
 
 - **Be extractive, not creative.** Pull requirements from the issue content. Don't invent requirements the issue doesn't mention.
 - **Preserve nuance.** If contributors disagreed, note the disagreement — don't pick a side.
-- **Flag gaps.** If the issue is vague, say so. List what's missing as open questions for the brainstormer.
-- **Keep it concise.** The evaluation should be 1-2 pages. The brainstormer will explore further with the user.
+- **Flag gaps.** If the issue is vague, say so. List what's missing as open questions — the design-doc-writer will attempt to resolve them from codebase exploration, or document them as assumptions.
+- **Keep it concise.** The evaluation should be 1-2 pages. The design-doc-writer will explore the codebase further.
 - **Don't skip comments.** Often the most important requirements are buried in comment threads, not the original body.
+- **Assess autonomy honestly.** If the issue is too vague to build without human input, say so. Better to flag early than produce a bad design doc.

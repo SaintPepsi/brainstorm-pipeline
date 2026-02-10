@@ -43,7 +43,7 @@ See [skills/design-to-deploy/SKILL.md](skills/design-to-deploy/SKILL.md) for ful
 
 ### github-issue-to-deploy
 
-GitHub issue intake layer for design-to-deploy. Fetches an issue, evaluates the requirements, structures them into a brainstorm brief, and hands off to the full pipeline — so the brainstorm starts informed instead of from scratch.
+Fully autonomous pipeline from GitHub issue to verified implementation. No interactive brainstorm — the issue IS the brainstorm. Fetches the issue, evaluates requirements, writes a design doc autonomously, and runs the full build pipeline. You invoke it and walk away.
 
 ```bash
 /github-issue-to-deploy owner/repo#42
@@ -55,7 +55,8 @@ GitHub issue intake layer for design-to-deploy. Fetches an issue, evaluates the 
 
 ```
 EVALUATE (fetch + classify + extract requirements from issue)
-  └── DESIGN-TO-DEPLOY (pre-seeded brainstorm → autonomous build)
+  → DESIGN (autonomous design doc from issue context + codebase)
+    → BUILD (scope → plan → implement → test → verify → review)
 ```
 
 All commits reference the source issue (`refs #N`), and the final PR uses `closes #N` for auto-closing.
