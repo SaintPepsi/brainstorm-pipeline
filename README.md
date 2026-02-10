@@ -41,6 +41,27 @@ Phase 2 (autonomous, Task agents):
 
 See [skills/design-to-deploy/SKILL.md](skills/design-to-deploy/SKILL.md) for full documentation.
 
+### evaluate-design-deploy
+
+GitHub issue intake layer for design-to-deploy. Fetches an issue, evaluates the requirements, structures them into a brainstorm brief, and hands off to the full pipeline — so the brainstorm starts informed instead of from scratch.
+
+```bash
+/evaluate-design-deploy owner/repo#42
+/evaluate-design-deploy https://github.com/owner/repo/issues/42
+/evaluate-design-deploy #42    # when inside the target repo
+```
+
+**Pipeline:**
+
+```
+EVALUATE (fetch + classify + extract requirements from issue)
+  └── DESIGN-TO-DEPLOY (pre-seeded brainstorm → autonomous build)
+```
+
+All commits reference the source issue (`refs #N`), and the final PR uses `closes #N` for auto-closing.
+
+See [skills/evaluate-design-deploy/SKILL.md](skills/evaluate-design-deploy/SKILL.md) for full documentation.
+
 ### session-token-analysis
 
 Analyses Claude Code session logs for token usage efficiency, cache performance, and context growth patterns.
@@ -73,6 +94,10 @@ brainstorm-pipeline/
 │   │   ├── references/
 │   │   │   └── sub-skills/      # 12 sub-skill instruction docs
 │   │   └── examples/            # Real execution logs
+│   ├── evaluate-design-deploy/  # GitHub issue intake for design-to-deploy
+│   │   ├── SKILL.md             # Skill definition
+│   │   └── references/
+│   │       └── sub-skills/      # Issue evaluator agent
 │   └── session-token-analysis/  # Token analysis skill
 │       ├── SKILL.md             # Skill definition
 │       └── scripts/
