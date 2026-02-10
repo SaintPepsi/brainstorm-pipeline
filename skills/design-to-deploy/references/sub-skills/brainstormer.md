@@ -62,6 +62,7 @@ Format: "As a [role], I want [action] so that [benefit]"
 - Key design decisions and rationale
 - Integration points with existing systems
 - References to existing patterns in the codebase
+- **Shared modules**: Identify logic, types, constants, or utilities that should be extracted into reusable modules (used by both implementation and tests)
 
 ### Risks & Assumptions
 - **Risks**: Potential technical or scope challenges

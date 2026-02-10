@@ -93,6 +93,17 @@ For each major step, specify:
 - Areas needing extra testing attention
 - Breaking changes to existing code
 
+## DRY + SOLID Requirements
+
+Before sequencing implementation steps, identify reuse opportunities:
+
+1. **Audit for existing code**: Search the codebase for utilities, helpers, types, or constants that already do what's needed. Plan to import them — never rewrite.
+2. **Extract shared modules first**: If multiple files will need the same logic, types, or constants, plan a shared module as the first implementation step. Both feature code and tests should import from it.
+3. **Follow SOLID**: Each planned module should have a single responsibility. Prefer composition over inheritance. Design interfaces that are focused and minimal.
+4. **No copy-paste in the plan**: If a code snippet appears in more than one step, extract it into a shared module step and import it instead.
+
+In the **Files to Create** section, explicitly call out any shared/utility modules with a `**Shared**: yes` tag so downstream agents know these are import targets.
+
 ## Guidelines
 - Be concrete: show code, not abstractions
 - Reference existing patterns in the codebase

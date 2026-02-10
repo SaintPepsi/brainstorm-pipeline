@@ -3,6 +3,20 @@
 All notable changes to this skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-02-10
+
+### Added
+
+- DRY + SOLID principles section in SKILL.md as a top-level pipeline-wide code quality standard
+- Enforcement touchpoints: planning, cross-check, implementation, and compliance stages all check for DRY/SOLID
+- Shared test infrastructure guidance in unit-test-planner and e2e-test-planner (factories, fixtures, page objects, helpers)
+- DRY requirements section in test-implementer: import production constants, create shared helpers before test files
+- DRY + SOLID requirements in feature-planner: audit for existing code, extract shared modules first
+- DRY + SOLID requirements in feature-implementer: import over copy, single responsibility, dependency inversion
+- DRY + SOLID review checklist in plan-reviewer: flag duplication across plans, missing shared utilities, hardcoded values
+- DRY + SOLID compliance check and report template in design-compliance-checker
+- Shared modules identification in brainstormer design doc output (Technical Approach section)
+
 ## [0.4.0] - 2026-02-09
 
 ### Added
