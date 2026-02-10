@@ -12,6 +12,8 @@
   "keywords": [
     "pipeline",
     "design-to-deploy",
+    "github-issue-to-deploy",
+    "github-issues",
     "token-analysis",
     "multi-agent",
     "tdd",

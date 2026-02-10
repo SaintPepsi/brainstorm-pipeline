@@ -41,6 +41,28 @@ Phase 2 (autonomous, Task agents):
 
 See [skills/design-to-deploy/SKILL.md](skills/design-to-deploy/SKILL.md) for full documentation.
 
+### github-issue-to-deploy
+
+Fully autonomous pipeline from GitHub issue to verified implementation. No interactive brainstorm — the issue IS the brainstorm. Fetches the issue, evaluates requirements, writes a design doc autonomously, and runs the full build pipeline. You invoke it and walk away.
+
+```bash
+/github-issue-to-deploy owner/repo#42
+/github-issue-to-deploy https://github.com/owner/repo/issues/42
+/github-issue-to-deploy #42    # when inside the target repo
+```
+
+**Pipeline:**
+
+```
+EVALUATE (fetch + classify + extract requirements from issue)
+  → DESIGN (autonomous design doc from issue context + codebase)
+    → BUILD (scope → plan → implement → test → verify → review)
+```
+
+All commits reference the source issue (`refs #N`), and the final PR uses `closes #N` for auto-closing.
+
+See [skills/github-issue-to-deploy/SKILL.md](skills/github-issue-to-deploy/SKILL.md) for full documentation.
+
 ### session-token-analysis
 
 Analyses Claude Code session logs for token usage efficiency, cache performance, and context growth patterns.
@@ -73,6 +95,10 @@ brainstorm-pipeline/
 │   │   ├── references/
 │   │   │   └── sub-skills/      # 12 sub-skill instruction docs
 │   │   └── examples/            # Real execution logs
+│   ├── github-issue-to-deploy/  # GitHub issue intake for design-to-deploy
+│   │   ├── SKILL.md             # Skill definition
+│   │   └── references/
+│   │       └── sub-skills/      # Issue evaluator agent
 │   └── session-token-analysis/  # Token analysis skill
 │       ├── SKILL.md             # Skill definition
 │       └── scripts/
