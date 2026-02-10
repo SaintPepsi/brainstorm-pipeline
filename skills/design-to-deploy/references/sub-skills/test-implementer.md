@@ -90,15 +90,8 @@ docs/test-reports/test-implementation-report.md
 Feature implementation should make these tests pass.
 ```
 
-## DRY Requirements — Import, Don't Copy
-
-- **Create shared helpers first**: Before writing any test file, create shared test utilities (factories, fixtures, setup helpers) identified in the test plans. All test files import from these — no duplicated setup code.
-- **Import production constants**: Import types, constants, enums, and validation rules from the implementation source. Never redefine values that already exist in production code.
-- **Shared factories over inline data**: If multiple tests need similar test objects, create a factory function in a shared module. Tests call the factory, not copy-paste the object literal.
-- **Common setup in beforeEach helpers**: If multiple `describe` blocks share setup logic, extract it into a shared helper and import it. Don't copy-paste `beforeEach` blocks.
-- **Page objects for E2E**: If the test plans specify shared page objects, create them first and import them in every E2E test file. Never duplicate selectors or interaction sequences across test files.
-
 ## Guidelines
+- Follow DRY, SOLID, and YAGNI — create shared helpers/factories first, import production constants, never copy-paste
 - Write tests that are easy to debug when they fail
 - Use descriptive test names: "should return X when given Y"
 - Avoid testing implementation details—test behavior

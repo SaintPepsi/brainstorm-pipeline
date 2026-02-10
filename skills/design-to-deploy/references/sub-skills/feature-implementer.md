@@ -94,16 +94,8 @@ docs/implementation-reports/feature-implementation-report.md
 [COMPLETE / NEEDS FIXES]: {one sentence summary}
 ```
 
-## DRY + SOLID Requirements
-
-- **Import, never copy**: If logic, types, constants, or helpers already exist in the codebase or in a shared module created earlier in the plan, import them. Never duplicate code that can be imported.
-- **Extract when reused**: If you find yourself writing the same logic in two places, stop — extract it into a shared module and import it from both locations.
-- **Single Responsibility**: Each file and function should do one thing. If a function grows beyond one responsibility, split it.
-- **Dependency Inversion**: Pass dependencies (services, config, adapters) into functions/classes rather than hard-coding them. This makes testing easier and follows the plan's architecture.
-- **Interface Segregation**: Keep exported interfaces focused. Don't bundle unrelated functionality into a single module.
-- **Check tests for shared imports**: Read the test files to see what they import. If tests import shared fixtures, factories, or constants, make sure your implementation is compatible with those shared modules.
-
 ## Guidelines
+- Follow DRY, SOLID, and YAGNI — import shared logic, never copy-paste it
 - Code as if tests are watching (because they are)
 - Don't skip steps—follow the plan order
 - If a step doesn't work, debug before moving to next

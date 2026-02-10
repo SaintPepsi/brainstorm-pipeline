@@ -80,18 +80,8 @@ tests/e2e/
 - Document screenshot naming convention
 - Note any expected visual variations (responsive breakpoints)
 
-## Shared Test Infrastructure (DRY)
-
-Plan reusable helpers so E2E test files import rather than duplicate:
-
-- **Page objects / component helpers**: If multiple scenarios interact with the same UI component, plan a shared page object or helper class. Never duplicate selectors or interaction sequences.
-- **Shared setup utilities**: Common navigation flows, authentication helpers, and data seeding functions should live in shared modules (e.g., `tests/e2e/helpers/`).
-- **Constants from production code**: Import route paths, feature flag names, and configuration values from the implementation — don't hardcode them in test files.
-- **Shared assertion helpers**: If multiple scenarios verify the same UI patterns (e.g., "toast notification appears"), plan a shared assertion helper.
-
-Include a **Shared E2E Utilities** section listing all page objects, helpers, and shared modules.
-
 ## Guidelines
+- Follow DRY, SOLID, and YAGNI — plan shared page objects/helpers, import production constants, never duplicate
 - Plan 1-3 E2E tests per major user story
 - Always include a happy path journey
 - Cover at least one error case per feature

@@ -63,18 +63,8 @@ For each module/component, specify:
 - Mocking strategy for external dependencies
 - Test runner command
 
-## Shared Test Infrastructure (DRY)
-
-Before planning individual test cases, identify shared test utilities that should be extracted:
-
-- **Fixtures & factories**: If multiple test files need the same test data, plan a shared factory or fixture module (e.g., `tests/helpers/factories.ts`).
-- **Setup utilities**: Common setup/teardown logic (database seeding, mock configuration) should live in shared helper modules, not be duplicated per test file.
-- **Constants from production code**: Tests should import constants, enums, and type definitions from the implementation — never redefine them in test files.
-- **Custom matchers/assertions**: If the same complex assertion pattern appears in multiple tests, plan a shared custom matcher.
-
-Include a **Shared Test Utilities** section in the plan listing all helpers, factories, and shared modules that test files will import from.
-
 ## Guidelines
+- Follow DRY, SOLID, and YAGNI — plan shared test helpers/factories/fixtures, import production constants, never duplicate
 - Plan at least 2-3 tests per public function
 - Always include error cases (invalid input, null values, boundary conditions)
 - Edge cases: off-by-one, empty collections, max values, special characters

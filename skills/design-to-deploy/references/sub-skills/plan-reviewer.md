@@ -95,17 +95,8 @@ docs/cross-check-report.md
 - [READY / NEEDS REVISION]: {one sentence summary}
 ```
 
-## DRY + SOLID Review
-
-In addition to consistency checks, review all plans for DRY and SOLID violations:
-
-- **Duplicated logic across plans**: If the feature plan and test plans both define the same constants, types, or helper logic inline, flag it. Patch by adding a shared module to the feature plan and updating test plans to import from it.
-- **Copy-paste patterns**: If the same code snippet or data structure appears in more than one plan, extract it into a shared module.
-- **Single Responsibility violations**: Flag any planned module that handles multiple unrelated concerns. Recommend splitting.
-- **Missing shared test utilities**: If test plans have duplicated setup across test files, add shared fixture/factory/helper modules to the test plan.
-- **Hardcoded values in tests**: If tests redefine constants, route paths, or config values that exist in production code, flag them and update to import instead.
-
 ## Guidelines
+- Flag DRY, SOLID, and YAGNI violations across plans — duplicated logic, missing shared modules, hardcoded values that should be imported
 - Be thorough—check every cross-reference
 - Consistency matters more than perfection
 - Gaps are better caught now than during implementation

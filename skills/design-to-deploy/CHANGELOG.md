@@ -7,15 +7,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 
 ### Added
 
-- DRY + SOLID principles section in SKILL.md as a top-level pipeline-wide code quality standard
-- Enforcement touchpoints: planning, cross-check, implementation, and compliance stages all check for DRY/SOLID
-- Shared test infrastructure guidance in unit-test-planner and e2e-test-planner (factories, fixtures, page objects, helpers)
-- DRY requirements section in test-implementer: import production constants, create shared helpers before test files
-- DRY + SOLID requirements in feature-planner: audit for existing code, extract shared modules first
-- DRY + SOLID requirements in feature-implementer: import over copy, single responsibility, dependency inversion
-- DRY + SOLID review checklist in plan-reviewer: flag duplication across plans, missing shared utilities, hardcoded values
-- DRY + SOLID compliance check and report template in design-compliance-checker
-- Shared modules identification in brainstormer design doc output (Technical Approach section)
+- DRY, SOLID, and YAGNI as a concise top-level code quality principle in SKILL.md
+- One-liner DRY/SOLID/YAGNI guideline added to each relevant sub-skill (brainstormer, feature-planner, feature-implementer, unit-test-planner, e2e-test-planner, test-implementer, plan-reviewer, design-compliance-checker)
 
 ## [0.4.0] - 2026-02-09
 

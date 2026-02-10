@@ -8,33 +8,9 @@ user-invocable: true
 
 Automate the journey from rough idea to verified, tested implementation.
 
-## Code Quality Principles: DRY + SOLID
+## Code Quality: DRY, SOLID, YAGNI
 
-These principles apply to **every stage** of the pipeline — planning, implementation, and tests.
-
-### DRY (Don't Repeat Yourself)
-
-Never copy-paste code that can be imported. If logic exists somewhere, import it. If it doesn't exist yet but will be used in more than one place, extract it into a shared module first.
-
-- **In implementation**: Extract shared utilities, constants, types, and helpers into dedicated modules. Import them everywhere they're needed.
-- **In tests**: Create shared test helpers, fixtures, factories, and setup utilities. Import them across test files instead of duplicating setup code.
-- **Between implementation and tests**: Tests should import the same constants, types, and validation logic that production code uses — never redefine them.
-
-### SOLID
-
-- **Single Responsibility**: Each module, class, and function does one thing. If a function needs an "and" to describe it, split it.
-- **Open/Closed**: Design for extension without modification. Use composition, callbacks, or strategy patterns over conditional branching on type.
-- **Liskov Substitution**: Subtypes must be substitutable for their base types without breaking behaviour.
-- **Interface Segregation**: Don't force consumers to depend on methods they don't use. Keep interfaces focused.
-- **Dependency Inversion**: Depend on abstractions, not concretions. Pass dependencies in rather than hard-coding them.
-
-### Enforcement
-
-These principles are checked at multiple pipeline stages:
-- **Planning** — planners must identify shared modules and reuse opportunities
-- **Cross-check** — reviewer flags duplication across plans
-- **Implementation** — implementers must extract, not copy
-- **Compliance** — checker verifies no DRY/SOLID violations in final code
+All pipeline stages — planning, implementation, and tests — must follow DRY, SOLID, and YAGNI principles. Import shared logic, never copy-paste it. If something exists in the codebase, use it. If it will be needed in more than one place, extract it into a shared module. Tests import production constants/types — never redefine them.
 
 ## Two Phases
 

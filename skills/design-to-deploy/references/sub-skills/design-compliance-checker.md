@@ -127,31 +127,8 @@ docs/compliance-reports/compliance-report.md
 - Recommendation: {merge / address gaps / review}
 ```
 
-## DRY + SOLID Compliance Check
-
-In addition to requirements compliance, verify code quality principles:
-
-- **No duplicated logic**: Search for copy-pasted code across implementation files. Any logic that appears in more than one place should be in a shared module.
-- **Tests import, not redefine**: Verify test files import constants, types, and shared utilities from production code or shared test helpers — not redefining them inline.
-- **Single Responsibility**: Each module/class should have one reason to change. Flag modules handling multiple unrelated concerns.
-- **Dependency Inversion**: Verify dependencies are injected, not hard-coded. Check that modules depend on abstractions where appropriate.
-- **Shared modules used correctly**: If the feature plan specified shared modules, verify they exist and are imported by all files that need them.
-
-Add a **DRY + SOLID Compliance** section to the report:
-
-```markdown
-## DRY + SOLID Compliance
-- [ ] No duplicated logic across implementation files
-- [ ] Tests import shared helpers/factories (no copy-pasted setup)
-- [ ] Tests import production constants/types (no redefinition)
-- [ ] Each module has a single responsibility
-- [ ] Dependencies are injected, not hard-coded
-- [ ] Shared modules from plan exist and are used
-- Violations found:
-  - {describe violation and location}
-```
-
 ## Guidelines
+- Verify DRY, SOLID, and YAGNI compliance — flag duplicated logic, copy-pasted test setup, redefined constants, and SOLID violations
 - Be thorough—check every AC in design doc
 - Distinguish between "not implemented" and "implemented differently"
 - Deviations aren't necessarily bad—but they must be intentional and documented
