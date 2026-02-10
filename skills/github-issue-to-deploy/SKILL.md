@@ -1,6 +1,6 @@
 ---
-name: evaluate-design-deploy
-description: "GitHub issue intake pipeline that evaluates an issue, structures requirements, and feeds them into design-to-deploy for autonomous implementation. Bridges GitHub issues to the full brainstorm-to-verified-code workflow. TRIGGERS: evaluate-design-deploy, implement issue, build from issue, issue to implementation, github issue pipeline."
+name: github-issue-to-deploy
+description: "GitHub issue intake pipeline that evaluates an issue, structures requirements, and feeds them into design-to-deploy for autonomous implementation. Bridges GitHub issues to the full brainstorm-to-verified-code workflow. TRIGGERS: github-issue-to-deploy, implement issue, build from issue, issue to implementation, github issue pipeline."
 user-invocable: true
 allowed-tools:
   - Bash
@@ -14,7 +14,7 @@ allowed-tools:
 argument-hint: "<owner/repo#number | issue-url>"
 ---
 
-# Evaluate-Design-Deploy Pipeline
+# GitHub Issue to Deploy Pipeline
 
 Bridge GitHub issues into the design-to-deploy pipeline. Takes an issue reference, evaluates the requirements, structures them for the brainstormer, and hands off to the full autonomous build pipeline.
 
@@ -44,14 +44,14 @@ DESIGN-TO-DEPLOY (existing pipeline)
 Pass a GitHub issue reference — either a full URL or `owner/repo#number`:
 
 ```
-/evaluate-design-deploy owner/repo#42
-/evaluate-design-deploy https://github.com/owner/repo/issues/42
+/github-issue-to-deploy owner/repo#42
+/github-issue-to-deploy https://github.com/owner/repo/issues/42
 ```
 
 If you're inside the target repo, just the issue number works:
 
 ```
-/evaluate-design-deploy #42
+/github-issue-to-deploy #42
 ```
 
 ### What Happens

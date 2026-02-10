@@ -41,14 +41,14 @@ Phase 2 (autonomous, Task agents):
 
 See [skills/design-to-deploy/SKILL.md](skills/design-to-deploy/SKILL.md) for full documentation.
 
-### evaluate-design-deploy
+### github-issue-to-deploy
 
 GitHub issue intake layer for design-to-deploy. Fetches an issue, evaluates the requirements, structures them into a brainstorm brief, and hands off to the full pipeline — so the brainstorm starts informed instead of from scratch.
 
 ```bash
-/evaluate-design-deploy owner/repo#42
-/evaluate-design-deploy https://github.com/owner/repo/issues/42
-/evaluate-design-deploy #42    # when inside the target repo
+/github-issue-to-deploy owner/repo#42
+/github-issue-to-deploy https://github.com/owner/repo/issues/42
+/github-issue-to-deploy #42    # when inside the target repo
 ```
 
 **Pipeline:**
@@ -60,7 +60,7 @@ EVALUATE (fetch + classify + extract requirements from issue)
 
 All commits reference the source issue (`refs #N`), and the final PR uses `closes #N` for auto-closing.
 
-See [skills/evaluate-design-deploy/SKILL.md](skills/evaluate-design-deploy/SKILL.md) for full documentation.
+See [skills/github-issue-to-deploy/SKILL.md](skills/github-issue-to-deploy/SKILL.md) for full documentation.
 
 ### session-token-analysis
 
@@ -94,7 +94,7 @@ brainstorm-pipeline/
 │   │   ├── references/
 │   │   │   └── sub-skills/      # 12 sub-skill instruction docs
 │   │   └── examples/            # Real execution logs
-│   ├── evaluate-design-deploy/  # GitHub issue intake for design-to-deploy
+│   ├── github-issue-to-deploy/  # GitHub issue intake for design-to-deploy
 │   │   ├── SKILL.md             # Skill definition
 │   │   └── references/
 │   │       └── sub-skills/      # Issue evaluator agent
