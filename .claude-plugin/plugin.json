@@ -18,9 +18,6 @@
     "multi-agent",
     "tdd",
     "automation",
-    "workflow",
-    "task",
-    "task-tracking",
-    "checklist"
+    "workflow"
   ]
 }
