@@ -3,6 +3,19 @@
 All notable changes to this skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-02-11
+
+### Added
+
+- Explicit `createTask` instructions embedded in each pipeline stage of `design-to-deploy` and `github-issue-to-deploy` (PR #4)
+- Each stage now specifies when to create tasks, mark them in-progress, and mark them complete for terminal checkbox tracking
+- `design-to-deploy` creates 12 pipeline tasks upfront (brainstorm through final review) with per-stage lifecycle markers
+- `github-issue-to-deploy` creates only the 2 tasks it owns (evaluate and design doc); Phase 2 tasks are handled by `design-to-deploy`
+
+### Removed
+
+- `CLAUDE.md` with generic `createTask` guidance — replaced by specific per-stage instructions in each skill
+
 ## [0.6.0] - 2026-02-10
 
 ### Added
