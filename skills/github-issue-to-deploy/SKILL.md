@@ -105,9 +105,18 @@ cd .worktrees/${SESSION_ID}
 mkdir -p session-history/${SESSION_ID}/08-test-results/screenshots
 ```
 
-### Step 4: Evaluate and Classify
+### Step 4: Create Pipeline Tasks
 
-Spawn a Task agent (model: `haiku`) to read `references/sub-skills/issue-evaluator.md` and classify the issue.
+Create tasks for the stages this skill owns. Phase 2 tasks are handled by design-to-deploy.
+
+- Create a task for "Evaluate and classify issue"
+- Create a task for "Write design doc from issue"
+
+Mark each task in-progress when starting the stage and complete when the stage finishes.
+
+### Step 5: Evaluate and Classify
+
+Mark the "Evaluate and classify issue" task as in-progress. Spawn a Task agent (model: `haiku`) to read `references/sub-skills/issue-evaluator.md` and classify the issue.
 
 **Agent prompt pattern:**
 ```
@@ -117,11 +126,14 @@ Write output to session-history/${SESSION_ID}/00-issue-evaluation.md
 ```
 
 - Output: `session-history/${SESSION_ID}/00-issue-evaluation.md`
+- Mark the "Evaluate and classify issue" task as complete.
 - **Run `/compact` after this step** — the raw issue data is now captured in the evaluation.
 
 ## Phase 1 — Design (Autonomous)
 
 **This replaces the interactive brainstorm.** Instead of asking the user questions, the design-doc-writer explores the codebase and synthesises a design doc from the issue evaluation.
+
+Mark the "Write design doc from issue" task as in-progress.
 
 **Model selection:** Read the issue evaluation's autonomy assessment and scope estimate:
 - **Default (`sonnet`)**: Scope is `small` or `medium`, autonomy is `yes` or `yes-with-assumptions` with `low`/`medium` risk
@@ -140,6 +152,7 @@ and docs/designs/YYYY-MM-DD-${TOPIC}-design.md.
 
 - Output: `session-history/${SESSION_ID}/01-design-doc.md`
 - Commit: `design(${TOPIC}): design doc from issue #${ISSUE_NUM}`
+- Mark the "Write design doc from issue" task as complete.
 - **Run `/compact` after this step**
 
 ## Phase 2 — Build (Autonomous)
