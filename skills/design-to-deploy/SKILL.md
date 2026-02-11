@@ -109,9 +109,30 @@ cd .worktrees/${SESSION_ID}
 mkdir -p session-history/${SESSION_ID}/08-test-results/screenshots
 ```
 
-### 2. Phase 1 — Interactive Brainstorm
+### 2. Create Pipeline Tasks
+
+After setting up the worktree, create a task for each pipeline stage so progress is visible in the terminal:
+
+- Create a task for "Brainstorm design with user"
+- Create a task for "Validate scope"
+- Create a task for "Plan unit tests"
+- Create a task for "Plan e2e tests"
+- Create a task for "Plan feature implementation"
+- Create a task for "Cross-check plans"
+- Create a task for "Implement tests (failing)"
+- Create a task for "Implement feature"
+- Create a task for "Verify unit tests pass"
+- Create a task for "Verify e2e tests pass"
+- Create a task for "Verify design compliance"
+- Create a task for "Compile final review"
+
+Mark each task in-progress when starting the stage and complete when the stage finishes.
+
+### 3. Phase 1 — Interactive Brainstorm
 
 **Run this yourself in main context. Do NOT spawn a Task agent.**
+
+Mark the "Brainstorm design with user" task as in-progress.
 
 Read `references/sub-skills/brainstormer.md` for the brainstorm process. Then have a conversation with the user:
 
@@ -121,61 +142,72 @@ Read `references/sub-skills/brainstormer.md` for the brainstorm process. Then ha
 4. Write the design doc to `session-history/${SESSION_ID}/01-design-doc.md` and `docs/designs/YYYY-MM-DD-${TOPIC}-design.md`.
 5. Commit: `design(${TOPIC}): brainstorm complete`
 
+Mark the "Brainstorm design with user" task as complete.
+
 **The design doc is the handoff point.** It must capture every decision so that Phase 2 agents can work without asking the user anything.
 
-### 3. Phase 2 — Autonomous Build
+### 4. Phase 2 — Autonomous Build
 
 Once the design doc is committed, **run `/compact` to clear the brainstorm conversation from context**, then run the remaining stages as Task agents. For each stage, spawn a fresh Task agent with: the sub-skill doc path (for the agent to read) + the input file paths + the recommended model.
 
-**Stage 2 — Validate Scope:** Spawn Task agent (model: `haiku`) → reads `references/sub-skills/scope-validator.md` + design doc. Checks scope against heuristics, may split into multiple design docs.
+**Stage 2 — Validate Scope:** Mark the "Validate scope" task as in-progress. Spawn Task agent (model: `haiku`) → reads `references/sub-skills/scope-validator.md` + design doc. Checks scope against heuristics, may split into multiple design docs.
 
 - Output: `session-history/${SESSION_ID}/02-scope-validation.md`
 - Commit: `design(${TOPIC}): scope validated`
+- Mark the "Validate scope" task as complete.
 
-**Stages 3-5 — Plan (parallel):** Launch **3 Task agents in a single message** (model: `sonnet`):
+**Stages 3-5 — Plan (parallel):** Mark the "Plan unit tests", "Plan e2e tests", and "Plan feature implementation" tasks as in-progress. Launch **3 Task agents in a single message** (model: `sonnet`):
 
 - Agent 1 → reads `references/sub-skills/unit-test-planner.md` + design doc → `session-history/${SESSION_ID}/03-unit-test-plan.md`
 - Agent 2 → reads `references/sub-skills/e2e-test-planner.md` + design doc → `session-history/${SESSION_ID}/04-e2e-test-plan.md`
 - Agent 3 → reads `references/sub-skills/feature-planner.md` + design doc → `session-history/${SESSION_ID}/05-feature-plan.md`
 - Commit: `plan(${TOPIC}): all plans generated`
+- Mark all three planning tasks as complete.
 - **Run `/compact` after collecting results**
 
-**Stage 6 — Cross-Check:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/plan-reviewer.md` + all 3 plans + design doc. Finds gaps, inconsistencies, patches the plans.
+**Stage 6 — Cross-Check:** Mark the "Cross-check plans" task as in-progress. Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/plan-reviewer.md` + all 3 plans + design doc. Finds gaps, inconsistencies, patches the plans.
 
 - Output: `session-history/${SESSION_ID}/06-cross-check-report.md`
 - Commit: `plan(${TOPIC}): cross-check complete`
+- Mark the "Cross-check plans" task as complete.
 
-**Stage 7a — Implement Unit Tests:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-implementer.md` + unit test plan. Writes tests that **must fail** (feature doesn't exist yet). Run test command to confirm failure.
+**Stage 7a — Implement Unit Tests:** Mark the "Implement tests (failing)" task as in-progress. Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-implementer.md` + unit test plan. Writes tests that **must fail** (feature doesn't exist yet). Run test command to confirm failure.
 
 - Commit: `test(${TOPIC}): unit tests implemented (failing)`
 
 **Stage 7b — Implement E2E Tests:** Spawn Task agent (model: `sonnet`) → same sub-skill + e2e test plan. Tests **must fail**.
 
 - Commit: `test(${TOPIC}): e2e tests implemented (failing)`
+- Mark the "Implement tests (failing)" task as complete.
 
-**Stage 7c — Implement Feature:** Spawn Task agent (model: `sonnet`, or `opus` for complex logic) → reads `references/sub-skills/feature-implementer.md` + feature plan + design doc + test files (so it knows what to satisfy).
+**Stage 7c — Implement Feature:** Mark the "Implement feature" task as in-progress. Spawn Task agent (model: `sonnet`, or `opus` for complex logic) → reads `references/sub-skills/feature-implementer.md` + feature plan + design doc + test files (so it knows what to satisfy).
 
 - Commit: `feat(${TOPIC}): feature implemented`
+- Mark the "Implement feature" task as complete.
 - **Run `/compact` after implementation completes**
 
-**Stage 7d — Verify Unit Tests:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-verifier.md`. Runs unit tests. If they fail, apply retry logic (see below).
+**Stage 7d — Verify Unit Tests:** Mark the "Verify unit tests pass" task as in-progress. Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-verifier.md`. Runs unit tests. If they fail, apply retry logic (see below).
 
 - Commit: `test(${TOPIC}): unit tests passing`
+- Mark the "Verify unit tests pass" task as complete.
 
-**Stage 7e — Verify E2E Tests:** Spawn Task agent (model: `sonnet`) → same sub-skill for e2e. Runs e2e tests. Apply retry logic if needed.
+**Stage 7e — Verify E2E Tests:** Mark the "Verify e2e tests pass" task as in-progress. Spawn Task agent (model: `sonnet`) → same sub-skill for e2e. Runs e2e tests. Apply retry logic if needed.
 
 - Commit: `test(${TOPIC}): e2e tests passing`
+- Mark the "Verify e2e tests pass" task as complete.
 
-**Stage 7f — Verify Design Compliance:** Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/design-compliance-checker.md` + design doc + all implementations. Checks every acceptance criterion.
+**Stage 7f — Verify Design Compliance:** Mark the "Verify design compliance" task as in-progress. Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/design-compliance-checker.md` + design doc + all implementations. Checks every acceptance criterion.
 
 - Output: `session-history/${SESSION_ID}/09-design-compliance.md`
 - Commit: `verify(${TOPIC}): design compliance confirmed`
+- Mark the "Verify design compliance" task as complete.
 
-**Stage 8 — Final Review:** Spawn Task agent (model: `haiku`) → reads `references/sub-skills/review-compiler.md` + all artifacts. Produces human handoff notes.
+**Stage 8 — Final Review:** Mark the "Compile final review" task as in-progress. Spawn Task agent (model: `haiku`) → reads `references/sub-skills/review-compiler.md` + all artifacts. Produces human handoff notes.
 
 - Output: `session-history/${SESSION_ID}/10-review-notes.md`
+- Mark the "Compile final review" task as complete.
 
-### 4. Finalise
+### 5. Finalise
 
 **On success** — merge and clean up:
 

@@ -105,9 +105,29 @@ cd .worktrees/${SESSION_ID}
 mkdir -p session-history/${SESSION_ID}/08-test-results/screenshots
 ```
 
-### Step 4: Evaluate and Classify
+### Step 4: Create Pipeline Tasks
 
-Spawn a Task agent (model: `haiku`) to read `references/sub-skills/issue-evaluator.md` and classify the issue.
+Create a task for each pipeline stage so progress is visible in the terminal:
+
+- Create a task for "Evaluate and classify issue"
+- Create a task for "Write design doc from issue"
+- Create a task for "Validate scope"
+- Create a task for "Plan unit tests"
+- Create a task for "Plan e2e tests"
+- Create a task for "Plan feature implementation"
+- Create a task for "Cross-check plans"
+- Create a task for "Implement tests (failing)"
+- Create a task for "Implement feature"
+- Create a task for "Verify unit tests pass"
+- Create a task for "Verify e2e tests pass"
+- Create a task for "Verify design compliance"
+- Create a task for "Compile final review"
+
+Mark each task in-progress when starting the stage and complete when the stage finishes.
+
+### Step 5: Evaluate and Classify
+
+Mark the "Evaluate and classify issue" task as in-progress. Spawn a Task agent (model: `haiku`) to read `references/sub-skills/issue-evaluator.md` and classify the issue.
 
 **Agent prompt pattern:**
 ```
@@ -117,11 +137,14 @@ Write output to session-history/${SESSION_ID}/00-issue-evaluation.md
 ```
 
 - Output: `session-history/${SESSION_ID}/00-issue-evaluation.md`
+- Mark the "Evaluate and classify issue" task as complete.
 - **Run `/compact` after this step** — the raw issue data is now captured in the evaluation.
 
 ## Phase 1 — Design (Autonomous)
 
 **This replaces the interactive brainstorm.** Instead of asking the user questions, the design-doc-writer explores the codebase and synthesises a design doc from the issue evaluation.
+
+Mark the "Write design doc from issue" task as in-progress.
 
 **Model selection:** Read the issue evaluation's autonomy assessment and scope estimate:
 - **Default (`sonnet`)**: Scope is `small` or `medium`, autonomy is `yes` or `yes-with-assumptions` with `low`/`medium` risk
@@ -140,59 +163,69 @@ and docs/designs/YYYY-MM-DD-${TOPIC}-design.md.
 
 - Output: `session-history/${SESSION_ID}/01-design-doc.md`
 - Commit: `design(${TOPIC}): design doc from issue #${ISSUE_NUM}`
+- Mark the "Write design doc from issue" task as complete.
 - **Run `/compact` after this step**
 
 ## Phase 2 — Build (Autonomous)
 
 Run the design-to-deploy Phase 2 stages exactly as documented in the design-to-deploy SKILL.md. All sub-skill docs come from `../design-to-deploy/references/sub-skills/`. The only difference: commit messages include `refs #${ISSUE_NUM}` in the body.
 
-**Stage 2 — Validate Scope:** Task agent (model: `haiku`) → `scope-validator.md` + design doc
+**Stage 2 — Validate Scope:** Mark the "Validate scope" task as in-progress. Task agent (model: `haiku`) → `scope-validator.md` + design doc
 
 - Output: `session-history/${SESSION_ID}/02-scope-validation.md`
 - Commit: `design(${TOPIC}): scope validated  refs #${ISSUE_NUM}`
+- Mark the "Validate scope" task as complete.
 
-**Stages 3-5 — Plan (parallel):** Launch 3 Task agents in a single message (model: `sonnet`):
+**Stages 3-5 — Plan (parallel):** Mark the "Plan unit tests", "Plan e2e tests", and "Plan feature implementation" tasks as in-progress. Launch 3 Task agents in a single message (model: `sonnet`):
 
 - Agent 1 → `unit-test-planner.md` + design doc → `03-unit-test-plan.md`
 - Agent 2 → `e2e-test-planner.md` + design doc → `04-e2e-test-plan.md`
 - Agent 3 → `feature-planner.md` + design doc → `05-feature-plan.md`
 - Commit: `plan(${TOPIC}): all plans generated  refs #${ISSUE_NUM}`
+- Mark all three planning tasks as complete.
 - **Run `/compact` after collecting results**
 
-**Stage 6 — Cross-Check:** Task agent (model: `sonnet`) → `plan-reviewer.md` + all 3 plans + design doc
+**Stage 6 — Cross-Check:** Mark the "Cross-check plans" task as in-progress. Task agent (model: `sonnet`) → `plan-reviewer.md` + all 3 plans + design doc
 
 - Output: `session-history/${SESSION_ID}/06-cross-check-report.md`
 - Commit: `plan(${TOPIC}): cross-check complete  refs #${ISSUE_NUM}`
+- Mark the "Cross-check plans" task as complete.
 
-**Stage 7a — Implement Unit Tests:** Task agent (model: `sonnet`) → `test-implementer.md` + unit test plan. Tests **must fail**.
+**Stage 7a — Implement Unit Tests:** Mark the "Implement tests (failing)" task as in-progress. Task agent (model: `sonnet`) → `test-implementer.md` + unit test plan. Tests **must fail**.
 
 - Commit: `test(${TOPIC}): unit tests implemented (failing)  refs #${ISSUE_NUM}`
 
 **Stage 7b — Implement E2E Tests:** Task agent (model: `sonnet`) → same sub-skill + e2e test plan. Tests **must fail**.
 
 - Commit: `test(${TOPIC}): e2e tests implemented (failing)  refs #${ISSUE_NUM}`
+- Mark the "Implement tests (failing)" task as complete.
 
-**Stage 7c — Implement Feature:** Task agent (model: `sonnet`, or `opus` for complex logic) → `feature-implementer.md` + feature plan + design doc + test files.
+**Stage 7c — Implement Feature:** Mark the "Implement feature" task as in-progress. Task agent (model: `sonnet`, or `opus` for complex logic) → `feature-implementer.md` + feature plan + design doc + test files.
 
 - Commit: `feat(${TOPIC}): feature implemented  refs #${ISSUE_NUM}`
+- Mark the "Implement feature" task as complete.
 - **Run `/compact` after implementation**
 
-**Stage 7d — Verify Unit Tests:** Task agent (model: `sonnet`) → `test-verifier.md`. Apply retry logic on failure.
+**Stage 7d — Verify Unit Tests:** Mark the "Verify unit tests pass" task as in-progress. Task agent (model: `sonnet`) → `test-verifier.md`. Apply retry logic on failure.
 
 - Commit: `test(${TOPIC}): unit tests passing  refs #${ISSUE_NUM}`
+- Mark the "Verify unit tests pass" task as complete.
 
-**Stage 7e — Verify E2E Tests:** Task agent (model: `sonnet`) → same sub-skill. Apply retry logic.
+**Stage 7e — Verify E2E Tests:** Mark the "Verify e2e tests pass" task as in-progress. Task agent (model: `sonnet`) → same sub-skill. Apply retry logic.
 
 - Commit: `test(${TOPIC}): e2e tests passing  refs #${ISSUE_NUM}`
+- Mark the "Verify e2e tests pass" task as complete.
 
-**Stage 7f — Verify Design Compliance:** Task agent (model: `sonnet`) → `design-compliance-checker.md` + design doc + all implementations.
+**Stage 7f — Verify Design Compliance:** Mark the "Verify design compliance" task as in-progress. Task agent (model: `sonnet`) → `design-compliance-checker.md` + design doc + all implementations.
 
 - Output: `session-history/${SESSION_ID}/09-design-compliance.md`
 - Commit: `verify(${TOPIC}): design compliance confirmed  refs #${ISSUE_NUM}`
+- Mark the "Verify design compliance" task as complete.
 
-**Stage 8 — Final Review:** Task agent (model: `haiku`) → `review-compiler.md` + all artifacts.
+**Stage 8 — Final Review:** Mark the "Compile final review" task as in-progress. Task agent (model: `haiku`) → `review-compiler.md` + all artifacts.
 
 - Output: `session-history/${SESSION_ID}/10-review-notes.md`
+- Mark the "Compile final review" task as complete.
 
 ## Finalise
 
