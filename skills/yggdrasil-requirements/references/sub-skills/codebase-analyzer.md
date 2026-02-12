@@ -2,7 +2,7 @@
 
 ## Execution Model
 
-**This stage runs as a Task agent (model: `sonnet`).** It receives a target project path and produces a structured analysis of everything relevant to implementing Yggdrasil worktree infrastructure.
+**This stage runs as a Task agent.** It receives a target project path and produces a structured analysis of everything relevant to implementing Yggdrasil worktree infrastructure.
 
 ## Purpose
 

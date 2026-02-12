@@ -75,7 +75,7 @@ Mark each task in-progress when starting and complete when finished.
 
 Mark the "Analyse target project codebase" task as in-progress.
 
-Spawn a Task agent (model: `sonnet`) to read `references/sub-skills/codebase-analyzer.md` and explore the target project.
+Spawn a Task agent to read `references/sub-skills/codebase-analyzer.md` and explore the target project.
 
 **Agent prompt pattern:**
 ```
@@ -205,7 +205,7 @@ Mark the "Produce Yggdrasil requirements document" task as complete.
 
 | Stage | Model | Why |
 |-------|-------|-----|
-| Codebase analysis | `sonnet` | Systematic exploration, structured output |
+| Codebase analysis | Inherited from caller | Systematic exploration, structured output |
 | User interview | User's current model | Interactive, benefits from strong reasoning |
 | Requirements doc | User's current model | Synthesis of all findings — runs in main context |
 
@@ -218,7 +218,7 @@ Mark the "Produce Yggdrasil requirements document" task as complete.
 
 | Sub-Skill | Runs In | Input | Output |
 |-----------|---------|-------|--------|
-| `codebase-analyzer` | Task agent (sonnet) | Target project path | codebase-analysis.md |
+| `codebase-analyzer` | Task agent | Target project path | codebase-analysis.md |
 
 ## Output Artifact
 
