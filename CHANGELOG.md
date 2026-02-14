@@ -4,6 +4,12 @@ All notable changes to the brainstorm-pipeline plugin will be documented in this
 For skill-specific changes, see the CHANGELOG.md in each skill directory.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-02-15
+
+### Added
+
+- New `dissect-plan` skill — breaks large plan documents into small, self-contained plan files (max 50 lines) that agents can execute independently, with dependency tracking and validation
+
 ## [0.7.0] - 2026-02-11
 
 ### Added
