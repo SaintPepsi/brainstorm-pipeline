@@ -65,6 +65,8 @@ For each module/component, specify:
 
 ## Guidelines
 - Follow DRY, SOLID, and YAGNI — plan shared test helpers/factories/fixtures, import production constants, never duplicate
+- **Test against abstractions, not implementations.** If the design doc defines interfaces (see "Interfaces & Contracts" section), plan tests that exercise business logic through those interfaces using test doubles — not through concrete infrastructure. This makes tests fast, deterministic, and decoupled from infrastructure.
+- Plan test doubles (fakes, stubs) that implement the same interfaces as production code. Prefer simple fakes over mocking frameworks where possible.
 - Plan at least 2-3 tests per public function
 - Always include error cases (invalid input, null values, boundary conditions)
 - Edge cases: off-by-one, empty collections, max values, special characters

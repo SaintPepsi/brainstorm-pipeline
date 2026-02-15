@@ -86,6 +86,15 @@ Format: "As a [role], I want [action] so that [benefit]"
 - References to existing patterns in the codebase (with file paths)
 - Specific files to create or modify
 
+### Interfaces & Contracts (Dependency Inversion)
+Identify every boundary where business logic meets infrastructure (databases, APIs, file systems, external services, clocks, configuration). For each boundary:
+- **Name the abstraction**: e.g., `OrderRepository`, `PaymentGateway`, `NotificationService`
+- **Define the contract**: list the methods/operations the business logic needs
+- **Where it lives**: the interface is owned by the domain/business layer, not the infrastructure
+- **Known implementations**: which concrete implementations are expected (production, test doubles)
+
+This section drives the entire implementation sequence — interfaces are created first, implementations second, wiring last. If this section is empty or missing, the feature has no external boundaries and DIP does not apply.
+
 ### Risks & Assumptions
 - **Risks**: From the issue evaluation's risks, plus any you identified during codebase exploration
 - **Assumptions**: Any open questions you resolved by assumption (be explicit)

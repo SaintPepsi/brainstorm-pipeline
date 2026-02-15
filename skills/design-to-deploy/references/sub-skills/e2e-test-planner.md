@@ -82,6 +82,7 @@ tests/e2e/
 
 ## Guidelines
 - Follow DRY, SOLID, and YAGNI — plan shared page objects/helpers, import production constants, never duplicate
+- **Leverage Dependency Inversion for test infrastructure.** Where the application uses DIP (interfaces for external services, databases, etc.), plan E2E test setup that wires test-specific implementations (in-memory stores, mock APIs) at the composition root. This avoids needing separate test infrastructure while exercising real user flows.
 - Plan 1-3 E2E tests per major user story
 - Always include a happy path journey
 - Cover at least one error case per feature

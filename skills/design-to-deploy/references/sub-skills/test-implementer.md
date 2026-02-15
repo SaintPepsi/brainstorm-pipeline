@@ -92,6 +92,7 @@ Feature implementation should make these tests pass.
 
 ## Guidelines
 - Follow DRY, SOLID, and YAGNI — create shared helpers/factories first, import production constants, never copy-paste
+- **Apply Dependency Inversion in tests.** When the production code defines interfaces (repositories, clients, services), create test doubles (fakes, stubs) that implement those same interfaces. Test business logic through the abstractions, not through concrete infrastructure. Prefer simple in-memory fakes over mocking frameworks — they're easier to debug and maintain. Read `references/patterns/dependency-inversion.md` for examples.
 - Write tests that are easy to debug when they fail
 - Use descriptive test names: "should return X when given Y"
 - Avoid testing implementation details—test behavior
