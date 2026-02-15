@@ -4,6 +4,12 @@ All notable changes to the brainstorm-pipeline plugin will be documented in this
 For skill-specific changes, see the CHANGELOG.md in each skill directory.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-02-15
+
+### Added
+
+- New `refining-plans` skill — reviews existing implementation plans by building connection maps, tracing structural gaps, annotating tasks with inline cross-references, and rewriting plans with fixes applied. TDD-validated against baseline agent behavior.
+
 ## [0.8.0] - 2026-02-15
 
 ### Added

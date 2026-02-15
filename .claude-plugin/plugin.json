@@ -1,7 +1,7 @@
 {
   "name": "brainstorm-pipeline",
   "description": "Multi-agent pipeline skills for Claude Code: design-to-deploy automation, session token analysis, and development workflow tools",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "author": {
     "name": "Ian Hogers",
     "email": "info@ianhogers.com"
