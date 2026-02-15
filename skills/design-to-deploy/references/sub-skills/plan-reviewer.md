@@ -42,7 +42,7 @@ Cross-check all planning documents for gaps, inconsistencies, and interface mism
    - Do test plans use test doubles that implement the same interfaces as production code?
    - Flag violations: business logic importing infrastructure, dependencies constructed internally, leaky abstractions that expose implementation details.
 
-6. **Patch and Update**: For any gaps, inconsistencies, or missing items:
+7. **Patch and Update**: For any gaps, inconsistencies, or missing items:
    - Add them to appropriate plan(s)
    - Ensure cross-references are updated
    - Note rationale for additions
