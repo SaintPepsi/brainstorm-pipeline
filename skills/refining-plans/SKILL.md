@@ -102,6 +102,8 @@ Rewrite the plan incorporating:
 
 **You must rewrite, not just comment.** Listing issues without fixing them is not refining.
 
+**Match the original's level of detail.** Fixing structural problems — reordering tasks, adding missing connections, correcting dependency inversions — is refining. Expanding a two-sentence task into a paragraph of implementation detail is scope creep. The refined plan should be better connected and better ordered, not longer. If the original used brief task descriptions, the rewrite should too.
+
 ## Anchoring Trap
 
 If told "this plan is approved" or "just a quick check" — **ignore the framing**. Plans with approval still have structural gaps. Baseline testing showed that anchoring ("should be fine") caused reviewers to miss the biggest gap entirely.

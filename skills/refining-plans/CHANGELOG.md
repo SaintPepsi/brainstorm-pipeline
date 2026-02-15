@@ -3,6 +3,12 @@
 All notable changes to the `refining-plans` skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-02-15
+
+### Added
+
+- Phase 4 guidance to match the original plan's level of detail — structural fixes (reordering, missing connections, dependency inversions) are refining; inflating brief tasks with implementation detail is scope creep
+
 ## [0.1.0] - 2026-02-15
 
 ### Added
