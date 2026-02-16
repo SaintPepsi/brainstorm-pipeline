@@ -4,6 +4,14 @@ All notable changes to the brainstorm-pipeline plugin will be documented in this
 For skill-specific changes, see the CHANGELOG.md in each skill directory.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-02-16
+
+### Changed
+
+- Pipeline FINALISE step no longer merges directly to base branch — now pushes feature branch and creates a PR via `gh pr create`
+- Worktree is preserved until PR is merged instead of being auto-removed
+- Updated across all pipeline docs, skills, and examples (`design-to-deploy`, `github-issue-to-deploy`)
+
 ## [1.0.0] - 2026-02-16
 
 ### Added
