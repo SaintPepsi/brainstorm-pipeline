@@ -10,7 +10,21 @@ Automate the journey from rough idea to verified, tested implementation.
 
 ## Code Quality: DRY, SOLID, YAGNI
 
-All pipeline stages — planning, implementation, and tests — must follow DRY, SOLID, and YAGNI principles. Import shared logic, never copy-paste it. If something exists in the codebase, use it. If it will be needed in more than one place, extract it into a shared module. Tests import production constants/types — never redefine them.
+All pipeline stages — planning, implementation, and tests — follow DRY, SOLID, and YAGNI principles. Import shared logic from existing modules. Tests import production constants/types.
+
+### Dependency Inversion (DIP) — First-Class Principle
+
+DIP is the most impactful SOLID principle for generated code and gets special emphasis across the pipeline. The full pattern reference lives at `references/patterns/dependency-inversion.md` — sub-agents that produce or review code should read it.
+
+The core rule: **business logic defines the interfaces it needs; infrastructure implements them.** Dependencies point inward — the domain imports only its own abstractions.
+
+Every pipeline stage enforces DIP:
+
+- **Brainstorm**: Identify module boundaries and list which dependencies should be abstracted in an "Interfaces & Contracts" section of the design doc.
+- **Planning**: Sequence abstraction definitions before implementations. Interfaces first, then concrete classes, then wiring at the composition root.
+- **Implementation**: Create interface/protocol files before implementation files. Wire dependencies at a single composition root. Business logic accepts dependencies through constructors or parameters.
+- **Testing**: Write test doubles that implement the same interfaces as production code. Test business logic through abstractions.
+- **Review**: Flag DIP violations — business logic importing infrastructure, missing interfaces at boundaries, dependencies constructed internally.
 
 ## Two Phases
 

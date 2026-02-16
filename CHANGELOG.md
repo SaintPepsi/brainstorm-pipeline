@@ -4,6 +4,17 @@ All notable changes to the brainstorm-pipeline plugin will be documented in this
 For skill-specific changes, see the CHANGELOG.md in each skill directory.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-02-16
+
+### Added
+
+- Dependency Inversion Principle (DIP) as a first-class pattern across `design-to-deploy` and `github-issue-to-deploy` pipelines
+- New shared pattern reference: `skills/design-to-deploy/references/patterns/dependency-inversion.md`
+- "Interfaces & Contracts" required section in design doc output (brainstormer + design-doc-writer)
+- DIP violation checking in plan-reviewer cross-check step
+- DIP-aware implementation sequencing in feature-planner and feature-implementer
+- DIP-aware test planning in unit-test-planner, e2e-test-planner, and test-implementer
+
 ## [0.9.0] - 2026-02-15
 
 ### Added

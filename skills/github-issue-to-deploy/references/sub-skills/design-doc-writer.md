@@ -86,6 +86,15 @@ Format: "As a [role], I want [action] so that [benefit]"
 - References to existing patterns in the codebase (with file paths)
 - Specific files to create or modify
 
+### Interfaces & Contracts (Dependency Inversion)
+Identify every boundary where business logic meets infrastructure (databases, APIs, file systems, external services, clocks, configuration). For each boundary:
+- **Name the abstraction**: e.g., `OrderRepository`, `PaymentGateway`, `NotificationService`
+- **Define the contract**: list the methods/operations the business logic needs
+- **Where it lives**: the interface is owned by the domain/business layer, not the infrastructure
+- **Known implementations**: which concrete implementations are expected (production, test doubles)
+
+This section drives the entire implementation sequence — interfaces are created first, implementations second, wiring last. If this section is empty or missing, the feature has no external boundaries and DIP does not apply.
+
 ### Risks & Assumptions
 - **Risks**: From the issue evaluation's risks, plus any you identified during codebase exploration
 - **Assumptions**: Any open questions you resolved by assumption (be explicit)
@@ -100,9 +109,9 @@ Format: "As a [role], I want [action] so that [benefit]"
 
 ## Guidelines
 
-- **Ground everything in the codebase.** Reference actual files, patterns, and conventions you found. Don't propose patterns that contradict what's already there.
+- **Ground everything in the codebase.** Reference actual files, patterns, and conventions you found. Follow existing patterns.
 - **Be thorough but concise** (2-3 pages typical). Phase 2 agents will read this as their primary input.
-- **Don't invent requirements.** Stick to what the issue evaluation extracted. If you think something is missing, note it as a risk, don't add it as a requirement.
+- **Stick to extracted requirements.** If something seems missing, note it as a risk — keep the requirements section faithful to the issue evaluation.
 - **The design doc must be self-contained.** A reader with no context should understand what to build.
 - **Prefer simple solutions.** When the issue is ambiguous, choose the approach with fewer moving parts.
-- **Include file paths.** When referencing existing code or proposing new files, always include the full path.
+- **Include file paths.** When referencing existing code or proposing new files, include the full path.

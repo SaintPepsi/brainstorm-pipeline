@@ -3,6 +3,12 @@
 All notable changes to the `github-issue-to-deploy` skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-02-16
+
+### Added
+
+- "Interfaces & Contracts" required section in design-doc-writer output spec — ensures autonomous design docs identify infrastructure boundaries for DIP, matching the brainstormer's updated output format
+
 ## [0.7.0] - 2026-02-11
 
 ### Added

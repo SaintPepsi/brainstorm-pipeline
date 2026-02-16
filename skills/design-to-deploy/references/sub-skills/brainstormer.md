@@ -64,6 +64,15 @@ Format: "As a [role], I want [action] so that [benefit]"
 - References to existing patterns in the codebase
 - Identify shared modules / reusable code that implementation and tests should both import (DRY)
 
+### Interfaces & Contracts (Dependency Inversion)
+Identify every boundary where business logic meets infrastructure (databases, APIs, file systems, external services, clocks, configuration). For each boundary:
+- **Name the abstraction**: e.g., `OrderRepository`, `PaymentGateway`, `NotificationService`
+- **Define the contract**: list the methods/operations the business logic needs
+- **Where it lives**: the interface is owned by the domain/business layer, not the infrastructure
+- **Known implementations**: which concrete implementations are expected (production, test doubles)
+
+This section drives the entire implementation sequence — interfaces are created first, implementations second, wiring last. If this section is empty or missing, the feature has no external boundaries and DIP does not apply.
+
 ### Risks & Assumptions
 - **Risks**: Potential technical or scope challenges
 - **Assumptions**: Dependencies on external factors, infrastructure
@@ -71,7 +80,7 @@ Format: "As a [role], I want [action] so that [benefit]"
 ## Guidelines
 
 - Be thorough but concise (2-3 pages typical)
-- Use dialogue to ensure clarity — don't assume understanding
+- Use dialogue to ensure clarity — confirm understanding before documenting
 - Focus on "why" before "how"
 - Document trade-offs explicitly
 - Reference existing codebase patterns so Phase 2 agents follow conventions

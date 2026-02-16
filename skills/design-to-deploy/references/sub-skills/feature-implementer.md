@@ -11,8 +11,11 @@ Implement the actual feature code by following the feature plan step-by-step. Th
 ## Process
 1. **Read Feature Plan** completely. Understand architecture, file structure, and step sequence.
 
-2. **Follow Steps Sequentially**:
-   - Create files in order specified (usually bottom-up: utilities → business logic → integration)
+2. **Follow Steps Sequentially** (Dependency Inversion order):
+   - **Interfaces/abstractions first** — create port/protocol/interface files in the domain layer before anything else. Business logic imports these.
+   - **Business logic next** — implement core modules that depend only on the abstractions above. Accept dependencies through constructors or function parameters.
+   - **Infrastructure/adapters** — implement concrete classes (repos, clients, adapters) that fulfil the interfaces. These import from the domain layer.
+   - **Composition root** — wire concrete implementations to abstractions at the application entry point. This is the only place that knows about both interfaces and implementations.
    - For each file creation: follow code patterns shown in plan
    - For each file modification: make changes in specified line ranges
    - Verify each step before moving to next
@@ -27,7 +30,7 @@ Implement the actual feature code by following the feature plan step-by-step. Th
    - Follow existing project conventions
    - Include comments for non-obvious logic
    - Use consistent naming with rest of codebase
-   - No dead code or debug statements
+   - Remove dead code and debug statements before committing
 
 5. **Verify Implementation**:
    - After completing a logical section, run tests
@@ -95,10 +98,10 @@ docs/implementation-reports/feature-implementation-report.md
 ```
 
 ## Guidelines
-- Follow DRY, SOLID, and YAGNI — import shared logic, never copy-paste it
+- Follow DRY, SOLID, and YAGNI — import shared logic from existing modules
+- **Apply Dependency Inversion** at every boundary. Read `references/patterns/dependency-inversion.md` for the full pattern. Business logic imports only its own abstractions. If the plan specifies interfaces, create them before implementations. If it lacks interfaces but the code has infrastructure boundaries, create the interfaces yourself.
 - Code as if tests are watching (because they are)
-- Don't skip steps—follow the plan order
-- If a step doesn't work, debug before moving to next
+- Follow the plan order — debug each step before moving to the next
 - Commit atomically: logical groups of changes per commit
-- Keep implementation focused on the design—no scope creep
+- Keep implementation focused on the design
 - Document any deviations from the plan and why

@@ -64,9 +64,11 @@ For each module/component, specify:
 - Test runner command
 
 ## Guidelines
-- Follow DRY, SOLID, and YAGNI — plan shared test helpers/factories/fixtures, import production constants, never duplicate
+- Follow DRY, SOLID, and YAGNI — plan shared test helpers/factories/fixtures, import production constants
+- **Test against abstractions.** If the design doc defines interfaces (see "Interfaces & Contracts" section), plan tests that exercise business logic through those interfaces using test doubles. This makes tests fast, deterministic, and decoupled from infrastructure.
+- Plan test doubles (fakes, stubs) that implement the same interfaces as production code. Prefer simple fakes over mocking frameworks.
 - Plan at least 2-3 tests per public function
-- Always include error cases (invalid input, null values, boundary conditions)
+- Include error cases (invalid input, null values, boundary conditions)
 - Edge cases: off-by-one, empty collections, max values, special characters
-- Be specific with assertions—avoid vague "should work" statements
+- Be specific with assertions
 - If database involved, plan transaction/rollback strategy
