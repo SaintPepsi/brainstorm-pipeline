@@ -3,6 +3,24 @@
 All notable changes to the `design-to-deploy` skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-02-16
+
+### Added
+
+- Dependency Inversion Principle (DIP) as a first-class pattern across all pipeline stages
+- New `references/patterns/dependency-inversion.md` — concise pattern reference covering the principle, rules, and violation checklist
+- "Interfaces & Contracts" required section in brainstormer design doc output — identifies every boundary where business logic meets infrastructure
+- DIP section in SKILL.md code quality block, alongside DRY and YAGNI
+
+### Changed
+
+- Feature planner now sequences implementation in DIP order: interfaces first, business logic, infrastructure adapters, composition root last
+- Feature implementer follows the same interfaces-first build order and must never construct dependencies internally
+- Plan reviewer has a new step 6 checking for DIP violations before implementation begins
+- Unit test planner plans tests against abstractions using test doubles instead of concrete infrastructure
+- E2E test planner leverages DIP to wire test-specific implementations at the composition root
+- Test implementer creates test doubles that implement the same interfaces as production code
+
 ## [0.7.0] - 2026-02-11
 
 ### Added
