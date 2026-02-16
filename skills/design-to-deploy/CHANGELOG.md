@@ -3,6 +3,14 @@
 All notable changes to the `design-to-deploy` skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-02-16
+
+### Changed
+
+- FINALISE step replaced direct merge with `git push` + `gh pr create` — pipeline never merges to base branch
+- Worktree preserved until PR is merged instead of auto-removed on success
+- Updated example conversation to reflect PR-based flow
+
 ## [0.8.0] - 2026-02-16
 
 ### Added

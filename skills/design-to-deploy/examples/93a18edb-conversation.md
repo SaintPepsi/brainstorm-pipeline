@@ -571,15 +571,16 @@ Pipeline complete! Let me finalize by merging the feature branch back to master:
 
 ## 🤖 Assistant
 
-I was attempting to merge the feature branch to master as the final step in the design-to-deploy pipeline. According to the skill, on success we should:
+I was attempting to finalise the feature branch as the final step in the design-to-deploy pipeline. According to the skill, on success we should push and create a PR:
 
 ```bash
-cd ../../  # back to project root
-git merge feature/${TOPIC}
-git worktree remove .worktrees/${SESSION_ID}
+git push origin feature/${TOPIC} -u
+gh pr create --base master --head feature/${TOPIC} \
+  --title "{PR title from review notes}" \
+  --body "{summary from 10-review-notes.md}"
 ```
 
-However, I should let you decide if you want to merge now. The pipeline is complete with all stages passing:
+The PR is ready for your review. The pipeline is complete with all stages passing:
 
 **Pipeline Summary:**
 

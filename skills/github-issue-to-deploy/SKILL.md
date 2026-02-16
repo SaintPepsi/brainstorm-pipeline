@@ -211,15 +211,17 @@ Run the design-to-deploy Phase 2 stages exactly as documented in the design-to-d
 
 ### On Success
 
-Merge, clean up, and create a PR that closes the issue:
+Push and create a PR that closes the issue:
 
 ```bash
-cd ../../  # back to project root
-git merge feature/${TOPIC}
-git worktree remove .worktrees/${SESSION_ID}
+git push origin feature/${TOPIC} -u
+gh pr create --base master --head feature/${TOPIC} \
+  --title "{PR title from review notes}" \
+  --body "Closes #${ISSUE_NUM}\n\n{summary from 10-review-notes.md}"
+# Worktree is preserved until PR is merged
 ```
 
-Create a PR with `closes #${ISSUE_NUM}` in the body so the issue auto-closes on merge.
+The `closes #${ISSUE_NUM}` in the body auto-closes the issue when the PR is merged by a human.
 
 ### On Failure
 

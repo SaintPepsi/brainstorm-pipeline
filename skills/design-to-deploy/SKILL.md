@@ -223,12 +223,14 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 
 ### 5. Finalise
 
-**On success** — merge and clean up:
+**On success** — push and create PR:
 
 ```bash
-cd ../../  # back to project root
-git merge feature/${TOPIC}
-git worktree remove .worktrees/${SESSION_ID}
+git push origin feature/${TOPIC} -u
+gh pr create --base master --head feature/${TOPIC} \
+  --title "{PR title from review notes}" \
+  --body "{summary from 10-review-notes.md}"
+# Worktree is preserved until PR is merged
 ```
 
 **On failure** — preserve for human review:
