@@ -434,9 +434,11 @@ git worktree add ../worktrees/{session-id} -b feature/{topic}
 cd ../worktrees/{session-id}
 
 # On successful completion
-git checkout main
-git merge feature/{topic}
-git worktree remove ../worktrees/{session-id}
+git push origin feature/{topic} -u
+gh pr create --base master --head feature/{topic} \
+  --title "{PR title from review notes}" \
+  --body "{summary from 10-review-notes.md}"
+# Worktree is preserved until PR is merged
 
 # On failure - worktree preserved for human review
 ```
@@ -446,7 +448,7 @@ Benefits:
 - Main branch stays clean throughout
 - Failed pipelines don't pollute main
 - Easy to inspect/resume failed sessions
-- Clean merge on success
+- Creates PR for human review on success
 
 ### 4. Commit Strategy ✓
 
@@ -525,12 +527,13 @@ git add session-history/
 git commit -m "verify({topic}): design compliance confirmed"
 
 # 12. FINALISE
-cd ../{original-project}
-git merge feature/{topic}
-git worktree remove ../worktrees/$SESSION_ID
-git branch -d feature/{topic}
+git push origin feature/{topic} -u
+gh pr create --base master --head feature/{topic} \
+  --title "{PR title from review notes}" \
+  --body "{summary from 10-review-notes.md}"
+# Worktree is preserved until PR is merged
 
-echo "✅ Pipeline complete. Review session-history/$SESSION_ID/"
+echo "✅ Pipeline complete. PR created for review."
 ```
 
 ### On Pipeline Failure

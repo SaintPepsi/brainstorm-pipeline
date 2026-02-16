@@ -287,17 +287,12 @@ Project root: /Users/hogers/Documents/repos/rogue-like-cards
 ### On Success
 
 ```bash
-# Merge the feature branch
-cd /Users/hogers/Documents/repos/rogue-like-cards
-git merge feature/kill-counter
-
-# Clean up worktree
-git worktree remove ../worktrees/{SESSION_ID}
-
-# Verify everything one more time
-npm run test -- --run
-npx playwright test
-npm run check
+# Push and create PR for human review
+git push origin feature/kill-counter -u
+gh pr create --base master --head feature/kill-counter \
+  --title "{PR title from review notes}" \
+  --body "{summary from 10-review-notes.md}"
+# Worktree is preserved until PR is merged
 ```
 
 ### On Failure
