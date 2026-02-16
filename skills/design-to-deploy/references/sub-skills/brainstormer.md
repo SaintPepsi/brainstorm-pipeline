@@ -80,7 +80,7 @@ This section drives the entire implementation sequence — interfaces are create
 ## Guidelines
 
 - Be thorough but concise (2-3 pages typical)
-- Use dialogue to ensure clarity — don't assume understanding
+- Use dialogue to ensure clarity — confirm understanding before documenting
 - Focus on "why" before "how"
 - Document trade-offs explicitly
 - Reference existing codebase patterns so Phase 2 agents follow conventions

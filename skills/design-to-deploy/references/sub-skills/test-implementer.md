@@ -91,12 +91,12 @@ Feature implementation should make these tests pass.
 ```
 
 ## Guidelines
-- Follow DRY, SOLID, and YAGNI — create shared helpers/factories first, import production constants, never copy-paste
-- **Apply Dependency Inversion in tests.** When the production code defines interfaces (repositories, clients, services), create test doubles (fakes, stubs) that implement those same interfaces. Test business logic through the abstractions, not through concrete infrastructure. Prefer simple in-memory fakes over mocking frameworks — they're easier to debug and maintain. Read `references/patterns/dependency-inversion.md` for examples.
+- Follow DRY, SOLID, and YAGNI — create shared helpers/factories first, import production constants
+- **Apply Dependency Inversion in tests.** When the production code defines interfaces (repositories, clients, services), create test doubles (fakes, stubs) that implement those same interfaces. Test business logic through the abstractions. Prefer simple in-memory fakes over mocking frameworks — they're easier to debug and maintain. Read `references/patterns/dependency-inversion.md` for the full pattern.
 - Write tests that are easy to debug when they fail
 - Use descriptive test names: "should return X when given Y"
-- Avoid testing implementation details—test behavior
+- Test behavior, not implementation details
 - Mock external dependencies in unit tests
 - E2E tests should use real browser where possible
-- Each test should be independent (don't rely on test order)
+- Each test should be independent and order-agnostic
 - Include comments explaining complex test setup

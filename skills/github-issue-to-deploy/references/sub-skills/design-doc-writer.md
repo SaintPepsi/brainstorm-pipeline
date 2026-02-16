@@ -109,9 +109,9 @@ This section drives the entire implementation sequence — interfaces are create
 
 ## Guidelines
 
-- **Ground everything in the codebase.** Reference actual files, patterns, and conventions you found. Don't propose patterns that contradict what's already there.
+- **Ground everything in the codebase.** Reference actual files, patterns, and conventions you found. Follow existing patterns.
 - **Be thorough but concise** (2-3 pages typical). Phase 2 agents will read this as their primary input.
-- **Don't invent requirements.** Stick to what the issue evaluation extracted. If you think something is missing, note it as a risk, don't add it as a requirement.
+- **Stick to extracted requirements.** If something seems missing, note it as a risk — keep the requirements section faithful to the issue evaluation.
 - **The design doc must be self-contained.** A reader with no context should understand what to build.
 - **Prefer simple solutions.** When the issue is ambiguous, choose the approach with fewer moving parts.
-- **Include file paths.** When referencing existing code or proposing new files, always include the full path.
+- **Include file paths.** When referencing existing code or proposing new files, include the full path.

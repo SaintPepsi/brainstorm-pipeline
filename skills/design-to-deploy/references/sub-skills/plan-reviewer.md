@@ -36,11 +36,11 @@ Cross-check all planning documents for gaps, inconsistencies, and interface mism
 
 6. **Check Dependency Inversion** (read `references/patterns/dependency-inversion.md` for full details):
    - Does the feature plan define interfaces/abstractions before implementations?
-   - Are interfaces owned by the domain/business layer, not infrastructure?
-   - Does business logic depend only on abstractions, never on concrete infrastructure?
+   - Are interfaces owned by the domain/business layer?
+   - Does business logic depend only on its own abstractions?
    - Is there a clear composition root where wiring happens?
    - Do test plans use test doubles that implement the same interfaces as production code?
-   - Flag violations: business logic importing infrastructure, dependencies constructed internally, leaky abstractions that expose implementation details.
+   - Flag violations: business logic importing infrastructure, dependencies constructed internally, leaky abstractions.
 
 7. **Patch and Update**: For any gaps, inconsistencies, or missing items:
    - Add them to appropriate plan(s)
@@ -105,9 +105,9 @@ docs/cross-check-report.md
 
 ## Guidelines
 - Flag DRY, SOLID, and YAGNI violations across plans — duplicated logic, missing shared modules, hardcoded values that should be imported
-- **Flag Dependency Inversion violations** — business logic importing infrastructure, missing interfaces at module boundaries, dependencies constructed internally instead of injected, abstractions defined in the wrong layer. If the design doc has an "Interfaces & Contracts" section, verify the plans implement every listed abstraction.
-- Be thorough—check every cross-reference
+- **Flag Dependency Inversion violations** — business logic importing infrastructure, missing interfaces at module boundaries, dependencies constructed internally, abstractions defined in the wrong layer. If the design doc has an "Interfaces & Contracts" section, verify the plans implement every listed abstraction.
+- Check every cross-reference
 - Consistency matters more than perfection
-- Gaps are better caught now than during implementation
+- Catch gaps now — they're cheaper to fix than during implementation
 - Document your reasoning for all patches
-- If something seems ambiguous, flag it
+- Flag anything ambiguous

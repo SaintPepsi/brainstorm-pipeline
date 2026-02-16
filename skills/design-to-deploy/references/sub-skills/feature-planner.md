@@ -17,11 +17,11 @@ Create detailed implementation roadmap with file structure, code changes, and st
    - Identify all files to modify with line ranges and reason
 
 3. **Sequence Implementation** (Dependency Inversion order):
-   - **Interfaces/abstractions first** — define ports, protocols, or abstract classes that business logic will depend on. These live in the domain layer.
-   - **Business logic next** — core modules that import only the abstractions defined above, never concrete infrastructure.
+   - **Interfaces/abstractions first** — define ports, protocols, or abstract classes that business logic depends on. These live in the domain layer.
+   - **Business logic next** — core modules that import only the abstractions defined above.
    - **Infrastructure/adapters** — concrete implementations of the interfaces (database repos, API clients, file storage). These import from the domain layer.
    - **Composition root last** — wire concrete implementations to abstractions at the application entry point.
-   - UI/integration layers depend on abstractions, not implementations.
+   - UI/integration layers depend on abstractions.
    - If the design doc has an "Interfaces & Contracts" section, use it to drive this sequence directly.
 
 4. **Add Code Guidance**: For each step, include:
@@ -96,9 +96,9 @@ For each major step, specify:
 - Breaking changes to existing code
 
 ## Guidelines
-- Follow DRY, SOLID, and YAGNI — import shared logic, never copy-paste it
+- Follow DRY, SOLID, and YAGNI — import shared logic from existing modules
 - **Apply Dependency Inversion** at every boundary between business logic and infrastructure. Read `references/patterns/dependency-inversion.md` for the full pattern. Plan interface files before implementation files. Identify the composition root where wiring happens.
-- Be concrete: show code, not abstractions
+- Be concrete: show code patterns
 - Reference existing patterns in the codebase
 - Keep steps small enough to implement and verify independently
 - Provide enough detail that another Claude agent could follow it
