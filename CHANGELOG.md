@@ -4,6 +4,12 @@ All notable changes to the brainstorm-pipeline plugin will be documented in this
 For skill-specific changes, see the CHANGELOG.md in each skill directory.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-17
+
+### Changed
+
+- `changelog` skill: improved base branch detection to find closest remote branch by commit distance, replacing hardcoded `main`/`master`/`develop` fallback; generalized examples
+
 ## [1.2.0] - 2026-02-17
 
 ### Added
