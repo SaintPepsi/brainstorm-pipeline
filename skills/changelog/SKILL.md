@@ -25,36 +25,41 @@ digraph changelog {
 ### Step 1: Detect Base Branch and Ticket
 
 ```bash
-# Extract ticket ID from branch name (e.g., task/IODR-361-description -> IODR-361)
+# Extract ticket ID from branch name (e.g., feature/PROJ-123-add-auth -> PROJ-123)
 BRANCH=$(git branch --show-current)
-# Find base branch - try main first, then master, then develop
-git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
+# Find the closest remote branch by commit distance (fewest commits ahead = true base)
+for branch in $(git branch -r | grep -v HEAD); do
+count=$(git log --oneline "$branch"..HEAD 2>/dev/null | wc -l)
+echo "$count $branch"
+done | sort -n | head -5
 ```
 
-If the base branch is ambiguous, ask: "This branch split from `main` — is that correct?"
+Pick the closest branch (lowest non-zero commit count, excluding the current branch's own remote). In repos with chained task branches (e.g., PROJ-10 → PROJ-11 → PROJ-12), the parent task branch is the correct base — not `main` or `develop`.
+
+If the result is ambiguous (multiple branches at the same distance), ask: "This branch looks closest to `<branch>` — is that correct?"
 
 Extract the ticket ID from the branch name. If no ticket ID is found, ask the user.
 
 ### Step 2: Gather Commits
 
 ```bash
-git log --oneline main..HEAD    # adjust base branch as needed
+git log --oneline BASE_BRANCH..HEAD
 ```
 
-**Merge-heavy branches:** If `main..HEAD` returns a large number of commits (50+) from many merged branches, scope the changelog to the ticket in the branch name:
+**Merge-heavy branches:** If the commit list returns a large number of commits (50+) from many merged branches, you likely have the wrong base branch — go back to Step 1 and find a closer one. If no closer branch exists, scope the changelog to the ticket in the branch name:
 
 ```bash
 # Filter commits relevant to the ticket
-git log --oneline main..HEAD | grep -i "TICKET-ID"
+git log --oneline BASE_BRANCH..HEAD | grep -i "TICKET-ID"
 # Also check non-merge commits by the author for unlabelled work
-git log --oneline main..HEAD --no-merges --author="$(git config user.name)"
+git log --oneline BASE_BRANCH..HEAD --no-merges --author="$(git config user.name)"
 ```
 
 Use commit messages and the filtered diff to identify which changes belong to this ticket. Ignore commits from other merged branches.
 
 ### Step 3: Generate Changelog
 
-**Read the actual code changes** (`git diff main..HEAD`) to understand what changed. Don't rely solely on commit messages — they may be vague or misleading. For merge-heavy branches, scope the diff to relevant directories rather than the entire branch.
+**Read the actual code changes** (`git diff BASE_BRANCH..HEAD`) to understand what changed. Don't rely solely on commit messages — they may be vague or misleading. For merge-heavy branches, scope the diff to relevant directories rather than the entire branch.
 
 #### Bug Fix Format (1-3 commits)
 
@@ -66,16 +71,15 @@ Use commit messages and the filtered diff to identify which changes belong to th
 One paragraph: what was broken, why, and what the fix does.
 ```
 
-Example (accepted in IODR-350):
+Example:
 
 ```markdown
-# IODR-350: Path does not update when modifier is removed in Path Mapper
+# PROJ-42: Fix stale cache after profile update
 
 ## Bug Fix
 
-Clearing a modifier in the Debug Path Mapper no longer leaves the old modifier
-suffix on the path. Previously the `afterStateUpdated` callback returned early
-on empty state; it now strips the modifier suffix from the path.
+Updating a user profile no longer serves stale data. The cache key was not
+invalidated after a write; it now clears the relevant cache entry on save.
 ```
 
 #### Feature Format (4+ commits)
@@ -102,19 +106,17 @@ Only include sections that apply.
 - If a bullet needs more detail, use a sub-list instead of a long line
 - Sub-list items should be short phrases, not full sentences
 
-Example (accepted in IODR-361):
+Example:
 
 ```markdown
 ### Added
-- Update Phone Number action on the user view page
-- Two-step wizard: validate E.164 format, send OTP via Twilio, save after verification
-- Remove Phone Number action with confirmation dialog
-- User resource for Filament admin panel
-- List, view, and edit pages with phone number in infolist and table columns
-- Matters relation manager on the user view page
+- Two-factor authentication for user login
+- TOTP setup wizard with QR code and backup codes
+- Verification middleware for protected routes
+- Account recovery flow via email confirmation
 
 ### Changed
-- OTP frontend functions split into separate `sendOtp.ts` and `verifyOtp.ts` modules
+- Session tokens now include 2FA status claim
 ```
 
 ### Step 4: Write to File
