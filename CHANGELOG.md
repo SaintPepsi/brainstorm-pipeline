@@ -4,6 +4,12 @@ All notable changes to the brainstorm-pipeline plugin will be documented in this
 For skill-specific changes, see the CHANGELOG.md in each skill directory.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-02-18
+
+### Changed
+
+- `design-to-deploy` skill: split combined "Implement tests" task into separate unit and E2E tasks, added Pipeline Completion Gate requiring all stages complete before finalise, added task discipline rules and common failure mode warning to prevent skipping late-pipeline stages (E2E tests, design compliance, final review)
+
 ## [1.3.0] - 2026-02-17
 
 ### Changed

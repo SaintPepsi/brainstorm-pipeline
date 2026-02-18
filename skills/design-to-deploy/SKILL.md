@@ -125,22 +125,35 @@ mkdir -p session-history/${SESSION_ID}/08-test-results/screenshots
 
 ### 2. Create Pipeline Tasks
 
-After setting up the worktree, create a task for each pipeline stage so progress is visible in the terminal:
+After setting up the worktree, use TodoWrite to create **all 14 tasks upfront** so every stage is visible in the terminal from the start. This is the single source of truth for pipeline progress — a stage is not done until its task is marked complete.
 
-- Create a task for "Brainstorm design with user"
-- Create a task for "Validate scope"
-- Create a task for "Plan unit tests"
-- Create a task for "Plan e2e tests"
-- Create a task for "Plan feature implementation"
-- Create a task for "Cross-check plans"
-- Create a task for "Implement tests (failing)"
-- Create a task for "Implement feature"
-- Create a task for "Verify unit tests pass"
-- Create a task for "Verify e2e tests pass"
-- Create a task for "Verify design compliance"
-- Create a task for "Compile final review"
+```
+TodoWrite tasks (create all at once, all status: pending):
+ 1. "Brainstorm design with user"
+ 2. "Validate scope"
+ 3. "Plan unit tests"
+ 4. "Plan e2e tests"
+ 5. "Plan feature implementation"
+ 6. "Cross-check plans"
+ 7. "Implement unit tests (failing)"
+ 8. "Implement E2E tests (failing)"
+ 9. "Implement feature"
+10. "Verify unit tests pass"
+11. "Verify E2E tests pass"
+12. "Verify design compliance"
+13. "Compile final review"
+14. "Finalise — push and create PR"
+```
 
-Mark each task in-progress when starting the stage and complete when the stage finishes.
+**Task discipline (MANDATORY):**
+
+- **Mark in-progress** before starting each stage — no stage begins without this.
+- **Mark complete** only after the stage's output artifact is written and committed.
+- **Never mark a task complete early.** If a stage has sub-parts (e.g. unit + E2E), each has its own task.
+- **Never skip a task.** Every pending task must reach complete or the pipeline is considered failed.
+- **Check remaining tasks** after each stage completes. If any tasks were accidentally skipped, go back and do them before continuing.
+
+> **Common failure mode:** After implementing the feature (task 9), the orchestrator "forgets" the remaining verification tasks (10-13) because the core work feels done. The verification stages exist specifically to catch issues that the implementation stage cannot self-verify. Do not skip them.
 
 ### 3. Phase 1 — Interactive Brainstorm
 
@@ -185,14 +198,15 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 - Commit: `plan(${TOPIC}): cross-check complete`
 - Mark the "Cross-check plans" task as complete.
 
-**Stage 7a — Implement Unit Tests:** Mark the "Implement tests (failing)" task as in-progress. Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-implementer.md` + unit test plan. Writes tests that **must fail** (feature doesn't exist yet). Run test command to confirm failure.
+**Stage 7a — Implement Unit Tests:** Mark the "Implement unit tests (failing)" task as in-progress. Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-implementer.md` + unit test plan. Writes tests that **must fail** (feature doesn't exist yet). Run test command to confirm failure.
 
 - Commit: `test(${TOPIC}): unit tests implemented (failing)`
+- Mark the "Implement unit tests (failing)" task as complete.
 
-**Stage 7b — Implement E2E Tests:** Spawn Task agent (model: `sonnet`) → same sub-skill + e2e test plan. Tests **must fail**.
+**Stage 7b — Implement E2E Tests:** Mark the "Implement E2E tests (failing)" task as in-progress. Spawn Task agent (model: `sonnet`) → same sub-skill + e2e test plan. Tests **must fail**. Run test command to confirm failure.
 
 - Commit: `test(${TOPIC}): e2e tests implemented (failing)`
-- Mark the "Implement tests (failing)" task as complete.
+- Mark the "Implement E2E tests (failing)" task as complete.
 
 **Stage 7c — Implement Feature:** Mark the "Implement feature" task as in-progress. Spawn Task agent (model: `sonnet`, or `opus` for complex logic) → reads `references/sub-skills/feature-implementer.md` + feature plan + design doc + test files (so it knows what to satisfy).
 
@@ -205,7 +219,7 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 - Commit: `test(${TOPIC}): unit tests passing`
 - Mark the "Verify unit tests pass" task as complete.
 
-**Stage 7e — Verify E2E Tests:** Mark the "Verify e2e tests pass" task as in-progress. Spawn Task agent (model: `sonnet`) → same sub-skill for e2e. Runs e2e tests. Apply retry logic if needed.
+**Stage 7e — Verify E2E Tests:** Mark the "Verify E2E tests pass" task as in-progress. Spawn Task agent (model: `sonnet`) → same sub-skill for e2e. Runs e2e tests. Apply retry logic if needed.
 
 - Commit: `test(${TOPIC}): e2e tests passing`
 - Mark the "Verify e2e tests pass" task as complete.
@@ -219,9 +233,36 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 **Stage 8 — Final Review:** Mark the "Compile final review" task as in-progress. Spawn Task agent (model: `haiku`) → reads `references/sub-skills/review-compiler.md` + all artifacts. Produces human handoff notes.
 
 - Output: `session-history/${SESSION_ID}/10-review-notes.md`
+- Commit: `review(${TOPIC}): final review compiled`
 - Mark the "Compile final review" task as complete.
 
-### 5. Finalise
+### 5. Pipeline Completion Gate
+
+Before finalising, **review the full task list** and confirm every task (1-13) is marked complete. If any task is still pending or in-progress, go back and complete it now. Do not proceed to finalise with incomplete tasks.
+
+```
+Expected state before finalise:
+ 1. "Brainstorm design with user"         → completed
+ 2. "Validate scope"                      → completed
+ 3. "Plan unit tests"                     → completed
+ 4. "Plan e2e tests"                      → completed
+ 5. "Plan feature implementation"         → completed
+ 6. "Cross-check plans"                   → completed
+ 7. "Implement unit tests (failing)"      → completed
+ 8. "Implement E2E tests (failing)"       → completed
+ 9. "Implement feature"                   → completed
+10. "Verify unit tests pass"              → completed
+11. "Verify E2E tests pass"              → completed
+12. "Verify design compliance"            → completed
+13. "Compile final review"                → completed
+14. "Finalise — push and create PR"       → in_progress
+```
+
+If any task from 1-13 is not completed, **STOP** and complete it before moving on.
+
+### 6. Finalise
+
+Mark the "Finalise — push and create PR" task as in-progress.
 
 **On success** — push and create PR:
 
@@ -232,6 +273,8 @@ gh pr create --base master --head feature/${TOPIC} \
   --body "{summary from 10-review-notes.md}"
 # Worktree is preserved until PR is merged
 ```
+
+Mark the "Finalise — push and create PR" task as complete.
 
 **On failure** — preserve for human review:
 
