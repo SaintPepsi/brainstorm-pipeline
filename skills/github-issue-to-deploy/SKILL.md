@@ -103,6 +103,8 @@ SESSION_ID=$(date +%Y-%m-%d-%H-%M)-${TOPIC}
 git worktree add .worktrees/${SESSION_ID} -b feature/${TOPIC}
 cd .worktrees/${SESSION_ID}
 mkdir -p session-history/${SESSION_ID}/08-test-results/screenshots
+cp workspace/templates/PROGRESS.md PROGRESS.md
+# Fill in Pipeline section immediately: skill, session ID, topic, worktree path, issue number
 ```
 
 ### Step 4: Create Pipeline Tasks
@@ -126,6 +128,7 @@ Write output to session-history/${SESSION_ID}/00-issue-evaluation.md
 ```
 
 - Output: `session-history/${SESSION_ID}/00-issue-evaluation.md`
+- **Update `PROGRESS.md`** with evaluation outcome, scope classification, and autonomy assessment.
 - Mark the "Evaluate and classify issue" task as complete.
 - **Run `/compact` after this step** — the raw issue data is now captured in the evaluation.
 
@@ -152,6 +155,7 @@ and docs/designs/YYYY-MM-DD-${TOPIC}-design.md.
 
 - Output: `session-history/${SESSION_ID}/01-design-doc.md`
 - Commit: `design(${TOPIC}): design doc from issue #${ISSUE_NUM}`
+- **Update `PROGRESS.md`** with design decisions, architecture notes, and key interfaces.
 - Mark the "Write design doc from issue" task as complete.
 - **Run `/compact` after this step**
 
@@ -177,26 +181,30 @@ Run the design-to-deploy Phase 2 stages exactly as documented in the design-to-d
 - Output: `session-history/${SESSION_ID}/06-cross-check-report.md`
 - Commit: `plan(${TOPIC}): cross-check complete  refs #${ISSUE_NUM}`
 
-**Stage 7a — Implement Unit Tests:** Task agent (model: `sonnet`) → `test-implementer.md` + unit test plan. Tests **must fail**.
+**Stage 7a — Implement Unit Tests:** Task agent (model: `sonnet`) → `test-implementer.md` + unit test plan + `PROGRESS.md`. Tests **must fail**.
 
 - Commit: `test(${TOPIC}): unit tests implemented (failing)  refs #${ISSUE_NUM}`
+- **Save the agent ID for reuse in 7b.**
 
-**Stage 7b — Implement E2E Tests:** Task agent (model: `sonnet`) → same sub-skill + e2e test plan. Tests **must fail**.
+**Stage 7b — Implement E2E Tests:** **Resume the 7a agent** (same sub-skill, same codebase understanding) → pass the e2e test plan path. Tests **must fail**.
 
 - Commit: `test(${TOPIC}): e2e tests implemented (failing)  refs #${ISSUE_NUM}`
+- Update `PROGRESS.md` with test implementation details.
 
 **Stage 7c — Implement Feature:** Task agent (model: `sonnet`, or `opus` for complex logic) → `feature-implementer.md` + feature plan + design doc + test files.
 
 - Commit: `feat(${TOPIC}): feature implemented  refs #${ISSUE_NUM}`
 - **Run `/compact` after implementation**
 
-**Stage 7d — Verify Unit Tests:** Task agent (model: `sonnet`) → `test-verifier.md`. Apply retry logic on failure.
+**Stage 7d — Verify Unit Tests:** Task agent (model: `sonnet`) → `test-verifier.md` + `PROGRESS.md`. Apply retry logic on failure. **Include iteration limit in prompt: "You have 2 attempts to fix failing tests."**
 
 - Commit: `test(${TOPIC}): unit tests passing  refs #${ISSUE_NUM}`
+- **Save the agent ID for reuse in 7e.**
 
-**Stage 7e — Verify E2E Tests:** Task agent (model: `sonnet`) → same sub-skill. Apply retry logic.
+**Stage 7e — Verify E2E Tests:** **Resume the 7d agent** (same verification context) → pass e2e test command. Apply retry logic. **Include iteration limit in prompt: "You have 2 attempts to fix failing tests."**
 
 - Commit: `test(${TOPIC}): e2e tests passing  refs #${ISSUE_NUM}`
+- Update `PROGRESS.md` with verification results.
 
 **Stage 7f — Verify Design Compliance:** Task agent (model: `sonnet`) → `design-compliance-checker.md` + design doc + all implementations.
 
@@ -239,9 +247,11 @@ To abandon: git worktree remove .worktrees/${SESSION_ID} --force
 
 Same as design-to-deploy:
 
-1. **Attempt 1-2**: Fix within the test-verifier agent context (model: `sonnet`)
-2. **Attempt 3**: Escalate to systematic-debugger (model: `opus`) from `../design-to-deploy/references/sub-skills/systematic-debugger.md`
-3. **Attempt 4+**: **STOP PIPELINE** — write failure report, preserve worktree, report to user
+1. **Attempt 1-2**: Fix within the test-verifier agent context (model: `sonnet`). Prompt: *"You have 2 attempts to fix failing tests. After 2 failed attempts, stop and report the failures."*
+2. **Attempt 3**: Escalate to systematic-debugger (model: `opus`) from `../design-to-deploy/references/sub-skills/systematic-debugger.md`. Prompt: *"You have 1 attempt. If tests still fail after this attempt, write a failure report and stop."*
+3. **Attempt 4+**: **STOP PIPELINE** — write failure report to `session-history/${SESSION_ID}/08-test-results/failure-report.md`, update `PROGRESS.md` with the blocker, preserve worktree, report to user
+
+**Red flag**: context exceeding 100K tokens in a verification agent.
 
 ## Session History
 
@@ -288,6 +298,8 @@ Run `/compact` at these points:
 2. **After Phase 1** — design doc captures everything, evaluation no longer needed in context
 3. **After parallel planning** — plans are on disk
 4. **After feature implementation** — code is committed
+
+**Before every compaction**, update `PROGRESS.md` with current state, decisions, and next steps. This captures context so post-compaction agents can reconstruct state by reading a single file instead of replaying conversation history.
 
 ## Sub-Skill Reference
 

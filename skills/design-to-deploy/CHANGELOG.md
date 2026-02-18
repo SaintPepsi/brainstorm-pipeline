@@ -3,6 +3,25 @@
 All notable changes to the `design-to-deploy` skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-02-18
+
+### Added
+
+- PROGRESS.md integration: worktree setup copies template, compaction checkpoints require PROGRESS.md update, post-compaction agents read PROGRESS.md for state recovery
+- Iteration Limits subsection with hard caps for all retry loops (test verification: 2, systematic debugger: 1, build/lint: 5, self-correction: 3, exploration: 10 calls)
+- Agent Persistence for Coupled Stages subsection: resume 7a→7b (test impl) and 7d→7e (test verification), spawn fresh across phase boundaries and after compaction
+- "Best" example in Context Isolation Rules showing PROGRESS.md-based agent prompts after compaction
+- Explicit prompt wording in Test Verification Retry Logic per attempt level
+- Failure report path (`08-test-results/failure-report.md`) and PROGRESS.md update on pipeline stop
+- 100K token context red flag for verification agents
+
+### Changed
+
+- Stage 7a: saves agent ID for reuse in 7b
+- Stage 7b: resumes 7a agent instead of spawning fresh, updates PROGRESS.md
+- Stage 7d: reads PROGRESS.md, includes iteration limit in prompt, saves agent ID for reuse in 7e
+- Stage 7e: resumes 7d agent instead of spawning fresh, includes iteration limit, updates PROGRESS.md with verification results
+
 ## [0.10.0] - 2026-02-18
 
 ### Changed

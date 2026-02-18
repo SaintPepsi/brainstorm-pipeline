@@ -4,6 +4,13 @@ All notable changes to the brainstorm-pipeline plugin will be documented in this
 For skill-specific changes, see the CHANGELOG.md in each skill directory.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-02-18
+
+### Added
+
+- `workspace/templates/PROGRESS.md` — pipeline state template for compaction-resilient context recovery
+- Token efficiency optimizations across `design-to-deploy` and `github-issue-to-deploy`: PROGRESS.md integration at compaction checkpoints and key stages, iteration limits table for all retry loops, agent persistence for coupled stages (7a→7b, 7d→7e), explicit prompt wording in test verification retry logic, and 100K token red flag for verification agents
+
 ## [1.4.0] - 2026-02-18
 
 ### Changed

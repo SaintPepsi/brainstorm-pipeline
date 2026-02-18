@@ -73,6 +73,28 @@ Aim for these approximate turn counts per phase:
 
 If the orchestrator exceeds 60 turns or context exceeds 80K tokens, something is wrong — compact or split.
 
+**Before every compaction**, update `PROGRESS.md` in the worktree root (use the template from `workspace/templates/PROGRESS.md`). This captures decisions and state so post-compaction context can be reconstructed cheaply by reading a single file instead of replaying conversation history.
+
+### Iteration Limits
+
+Every retry loop has a hard cap. Include the relevant limit in every Task prompt: *"You have N attempts to fix X. If X still fails after N attempts, stop and report the failures."*
+
+| Loop | Cap | On Exceed |
+|------|-----|-----------|
+| Test verification (in-context fixes) | 2 attempts | Escalate to systematic-debugger |
+| Systematic debugger | 1 attempt | STOP pipeline, write failure report |
+| Build/lint fix cycles | 5 attempts | STOP, write failure report |
+| Agent self-correction (any stage) | 3 rounds | STOP, report to orchestrator |
+| Codebase exploration (tool calls) | 10 calls | Pause, reassess search strategy |
+
+### Agent Persistence for Coupled Stages
+
+**Persist (use resume):** 7a→7b (unit→e2e test impl), 7d→7e (unit→e2e verification).
+
+**Spawn fresh:** planning→implementation, implementation→verification, any stage after compaction.
+
+When resuming, pass only the delta (new file paths, updated `PROGRESS.md`).
+
 ## CRITICAL: Context Isolation Rules
 
 1. **Do NOT read sub-skill docs in your main context** (except `brainstormer.md` for Phase 1). When spawning Task agents for Phase 2, pass the sub-skill doc path in the prompt and let the Task agent read it.
@@ -95,6 +117,16 @@ Spawn Task agent with prompt:
   "Read references/sub-skills/scope-validator.md, then validate the design doc at
    session-history/{SESSION_ID}/01-design-doc.md. Write output to
    session-history/{SESSION_ID}/02-scope-validation.md"
+```
+
+Best (for agents after a compaction):
+
+```
+# DO this for agents after a compaction
+Spawn Task agent with prompt:
+  "Read PROGRESS.md for pipeline state, then read references/sub-skills/test-verifier.md.
+   Run unit tests. You have 2 attempts to fix failures.
+   Update PROGRESS.md when done."
 ```
 
 ## Pipeline Overview
@@ -121,6 +153,8 @@ SESSION_ID=$(date +%Y-%m-%d-%H-%M)-${TOPIC}
 git worktree add .worktrees/${SESSION_ID} -b feature/${TOPIC}
 cd .worktrees/${SESSION_ID}
 mkdir -p session-history/${SESSION_ID}/08-test-results/screenshots
+cp workspace/templates/PROGRESS.md PROGRESS.md
+# Fill in Pipeline section immediately: skill, session ID, topic, worktree path
 ```
 
 ### 2. Create Pipeline Tasks
@@ -202,10 +236,12 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 
 - Commit: `test(${TOPIC}): unit tests implemented (failing)`
 - Mark the "Implement unit tests (failing)" task as complete.
+- **Save the agent ID for reuse in 7b.**
 
-**Stage 7b — Implement E2E Tests:** Mark the "Implement E2E tests (failing)" task as in-progress. Spawn Task agent (model: `sonnet`) → same sub-skill + e2e test plan. Tests **must fail**. Run test command to confirm failure.
+**Stage 7b — Implement E2E Tests:** Mark the "Implement E2E tests (failing)" task as in-progress. **Resume the 7a agent** (same sub-skill, same codebase understanding) → pass the e2e test plan path. Tests **must fail**. Run test command to confirm failure.
 
 - Commit: `test(${TOPIC}): e2e tests implemented (failing)`
+- Update `PROGRESS.md` with completed stages.
 - Mark the "Implement E2E tests (failing)" task as complete.
 
 **Stage 7c — Implement Feature:** Mark the "Implement feature" task as in-progress. Spawn Task agent (model: `sonnet`, or `opus` for complex logic) → reads `references/sub-skills/feature-implementer.md` + feature plan + design doc + test files (so it knows what to satisfy).
@@ -214,14 +250,16 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 - Mark the "Implement feature" task as complete.
 - **Run `/compact` after implementation completes**
 
-**Stage 7d — Verify Unit Tests:** Mark the "Verify unit tests pass" task as in-progress. Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-verifier.md`. Runs unit tests. If they fail, apply retry logic (see below).
+**Stage 7d — Verify Unit Tests:** Mark the "Verify unit tests pass" task as in-progress. Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-verifier.md` + `PROGRESS.md`. Runs unit tests. If they fail, apply retry logic (see below). **Include iteration limit in prompt: "You have 2 attempts to fix failing tests."**
 
 - Commit: `test(${TOPIC}): unit tests passing`
 - Mark the "Verify unit tests pass" task as complete.
+- **Save the agent ID for reuse in 7e.**
 
-**Stage 7e — Verify E2E Tests:** Mark the "Verify E2E tests pass" task as in-progress. Spawn Task agent (model: `sonnet`) → same sub-skill for e2e. Runs e2e tests. Apply retry logic if needed.
+**Stage 7e — Verify E2E Tests:** Mark the "Verify E2E tests pass" task as in-progress. **Resume the 7d agent** (same verification context) → pass e2e test command. Runs e2e tests. Apply retry logic if needed. **Include iteration limit in prompt: "You have 2 attempts to fix failing tests."**
 
 - Commit: `test(${TOPIC}): e2e tests passing`
+- Update `PROGRESS.md` with verification results.
 - Mark the "Verify e2e tests pass" task as complete.
 
 **Stage 7f — Verify Design Compliance:** Mark the "Verify design compliance" task as in-progress. Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/design-compliance-checker.md` + design doc + all implementations. Checks every acceptance criterion.
@@ -289,11 +327,11 @@ To abandon: git worktree remove .worktrees/${SESSION_ID} --force
 
 When tests fail during verification:
 
-1. **Attempt 1-2**: Fix within the test-verifier agent context (model: `sonnet`)
-2. **Attempt 3**: Spawn a new Task agent (model: `opus`) using `references/sub-skills/systematic-debugger.md` — 4-phase methodology: root cause investigation, pattern analysis, hypothesis testing, implementation. This is where Opus earns its cost.
-3. **Attempt 4+**: **STOP PIPELINE** — write a failure report to session history, preserve worktree, tell the user what failed and why
+1. **Attempt 1-2**: Fix within the test-verifier agent context (model: `sonnet`). Prompt: *"You have 2 attempts to fix failing tests. After 2 failed attempts, stop and report the failures."*
+2. **Attempt 3**: Spawn a new Task agent (model: `opus`) using `references/sub-skills/systematic-debugger.md` — 4-phase methodology: root cause investigation, pattern analysis, hypothesis testing, implementation. This is where Opus earns its cost. Prompt: *"You have 1 attempt. If tests still fail after this attempt, write a failure report and stop."*
+3. **Attempt 4+**: **STOP PIPELINE** — write a failure report to `session-history/${SESSION_ID}/08-test-results/failure-report.md`, update `PROGRESS.md` with the blocker, preserve worktree, tell the user what failed and why.
 
-**Red flags that trigger immediate STOP**: "quick fix for now", multiple changes at once, 3+ failed attempts without clear progress.
+**Red flags that trigger immediate STOP**: "quick fix for now", multiple changes at once, 3+ failed attempts without clear progress, context exceeding 100K tokens in a verification agent.
 
 ## Scope Validation Heuristics
 
