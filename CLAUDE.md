@@ -20,3 +20,19 @@ Every change must be logged. This repo uses [Keep a Changelog](https://keepachan
 - Use `Added`, `Changed`, `Removed`, `Fixed` sections.
 - Be specific: name the files, sub-skills, or sections that changed.
 - One changelog entry per PR/commit group — don't log each file individually.
+
+## Pipeline Skill Authoring
+
+Rules for writing or modifying skills that use TodoWrite to track multi-stage pipelines.
+
+### One task per stage
+
+Every distinct pipeline stage gets its own task. Never combine two stages (e.g. "Implement unit + E2E tests") into a single task — when the first part finishes, the combined task gets marked complete and the second part is skipped.
+
+### Task name consistency
+
+Task names must be **character-for-character identical** everywhere they appear: the upfront task list, each stage's mark-in-progress/mark-complete instructions, and any completion gate checklist. Mismatched casing or punctuation breaks the link between stage and task.
+
+### Commit every artifact
+
+Every stage that produces an output artifact must include a `Commit:` instruction. Task discipline rules require artifacts to be "written and committed" before marking a task complete — a stage with no commit instruction contradicts that rule.
