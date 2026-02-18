@@ -219,7 +219,7 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 - Commit: `test(${TOPIC}): unit tests passing`
 - Mark the "Verify unit tests pass" task as complete.
 
-**Stage 7e — Verify E2E Tests:** Mark the "Verify e2e tests pass" task as in-progress. Spawn Task agent (model: `sonnet`) → same sub-skill for e2e. Runs e2e tests. Apply retry logic if needed.
+**Stage 7e — Verify E2E Tests:** Mark the "Verify E2E tests pass" task as in-progress. Spawn Task agent (model: `sonnet`) → same sub-skill for e2e. Runs e2e tests. Apply retry logic if needed.
 
 - Commit: `test(${TOPIC}): e2e tests passing`
 - Mark the "Verify e2e tests pass" task as complete.
@@ -233,6 +233,7 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 **Stage 8 — Final Review:** Mark the "Compile final review" task as in-progress. Spawn Task agent (model: `haiku`) → reads `references/sub-skills/review-compiler.md` + all artifacts. Produces human handoff notes.
 
 - Output: `session-history/${SESSION_ID}/10-review-notes.md`
+- Commit: `review(${TOPIC}): final review compiled`
 - Mark the "Compile final review" task as complete.
 
 ### 5. Pipeline Completion Gate
