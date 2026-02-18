@@ -3,6 +3,20 @@
 All notable changes to the `design-to-deploy` skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-02-18
+
+### Changed
+
+- Split "Implement tests (failing)" into two separate tasks: "Implement unit tests (failing)" and "Implement E2E tests (failing)" — each stage now has its own task with independent in-progress/complete tracking
+- Added "Finalise — push and create PR" as task 14, bringing total pipeline tasks from 12 to 14
+- Stage 7b now has explicit mark-in-progress and mark-complete instructions (previously had neither)
+
+### Added
+
+- Pipeline Completion Gate (section 5) — requires all 13 stage tasks to be marked complete before finalise begins, with full expected-state checklist
+- Task discipline rules block: mark-in-progress before starting, mark-complete only after artifact committed, never skip, check remaining tasks after each stage
+- "Common failure mode" warning about skipping verification stages (10-13) after feature implementation
+
 ## [0.9.0] - 2026-02-16
 
 ### Changed
