@@ -9,20 +9,25 @@ Plan end-to-end user journey tests using Playwright, covering real workflows wit
 - Project test configuration from `.design-to-deploy.yml`
 
 ## Process
-1. **Extract User Journeys**: From user stories and acceptance criteria, identify:
+1. **Scope Check — Is an E2E test plan needed?**
+   Evaluate whether the feature affects user-visible behaviour: page-level routes, user-facing workflows, UI layout changes, or acceptance criteria describing user actions. Read `references/patterns/svelte-conventions.md` for project-specific rules on what gets E2E tests vs unit tests.
+
+   If the feature has no user-visible behaviour to validate, output a short plan stating "No E2E tests needed" with a rationale explaining why, and list which test type (unit, integration, etc.) covers the behaviour instead. This is a valid outcome.
+
+2. **Extract User Journeys**: From user stories and acceptance criteria, identify:
    - Primary user workflows
    - Critical happy paths
    - Edge cases affecting user experience
    - Error scenarios users might encounter
 
-2. **Map to Playwright Scenarios**: For each journey, define:
+3. **Map to Playwright Scenarios**: For each journey, define:
    - Initial state/setup
    - User actions (clicks, input, navigation)
    - Expected UI changes
    - Visual regression points
    - Final verification
 
-3. **Plan Visual Assertions**: Identify points where:
+4. **Plan Visual Assertions**: Identify points where:
    - Screenshots should be captured (after major changes)
    - Visual stability should be asserted
    - Layout/rendering should be validated
@@ -81,8 +86,9 @@ tests/e2e/
 - Note any expected visual variations (responsive breakpoints)
 
 ## Guidelines
+- Read third-party component source before planning selectors (see `references/patterns/svelte-conventions.md`).
 - Follow DRY, SOLID, and YAGNI — plan shared page objects/helpers, import production constants
-- **Leverage Dependency Inversion for test infrastructure.** Where the application uses DIP (interfaces for external services, databases, etc.), plan E2E test setup that wires test-specific implementations (in-memory stores, mock APIs) at the composition root.
+- Leverage Dependency Inversion for test infrastructure (see `references/patterns/dependency-inversion.md`).
 - Plan 1-3 E2E tests per major user story
 - Include a happy path journey
 - Cover at least one error case per feature

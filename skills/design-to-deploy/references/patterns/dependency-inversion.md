@@ -24,3 +24,14 @@ Apply DIP at **module boundaries** — where business logic meets infrastructure
 3. **Abstractions defined in the infrastructure layer** — the interface belongs with the code that *consumes* it.
 4. **Wiring scattered across files** — composition logic lives at a single entry point.
 5. **Leaky abstractions** — interface methods that expose implementation details (e.g., `run_sql_query` on a repository interface). The interface reflects what the policy layer needs.
+
+## Implementation Sequence
+
+When planning or implementing, follow this order:
+
+1. **Interfaces/abstractions first** — define ports, protocols, or abstract classes that business logic depends on. These live in the domain layer.
+2. **Business logic next** — core modules that import only the abstractions above. Accept dependencies through constructors or parameters.
+3. **Infrastructure/adapters** — concrete implementations (repos, clients, adapters) that fulfil the interfaces. These import from the domain layer.
+4. **Composition root last** — wire concrete implementations to abstractions at the application entry point. This is the only place that knows about both interfaces and implementations.
+
+If the design doc has an "Interfaces & Contracts" section, use it to drive this sequence directly.

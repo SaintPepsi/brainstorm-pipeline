@@ -4,6 +4,24 @@ All notable changes to the brainstorm-pipeline plugin will be documented in this
 For skill-specific changes, see the CHANGELOG.md in each skill directory.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-02-19
+
+### Changed
+
+- `design-to-deploy` skill: consolidated sub-skill bloat — extracted Svelte-specific rules into `references/patterns/svelte-conventions.md`, DIP implementation sequence into `dependency-inversion.md`, and 7 report templates into `references/templates/`; trimmed all sub-skills from 1,429 to 940 lines (-34%) by replacing inline repetitions with one-line references
+
+## [1.7.0] - 2026-02-19
+
+### Added
+
+- `design-to-deploy` skill: pipeline retrospective improvements — mandatory mockup gate for UI features before design doc, middleware/cross-cutting impact analysis section in design doc, early E2E run after middleware wiring, third-party component source reading before writing selectors, "fix test infra not production defaults" rule, and user-provided test results acceptance to avoid redundant re-verification
+
+## [1.6.0] - 2026-02-19
+
+### Added
+
+- `design-to-deploy` skill: test plan scope checks and test file architecture validation — planners evaluate applicability before generating plans (unit tests only for standalone logic and `$lib/components/`, not page-level routes), cross-check reviewer flags `.svelte.test.ts` files outside `$lib/components/` and validates "not applicable" rationale, pipeline stages skip gracefully when a test type is not needed
+
 ## [1.5.0] - 2026-02-18
 
 ### Added

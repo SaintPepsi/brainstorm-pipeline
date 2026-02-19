@@ -3,6 +3,47 @@
 All notable changes to the `design-to-deploy` skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2026-02-19
+
+### Added
+
+- `references/patterns/svelte-conventions.md` — centralised Svelte-specific rules for test file architecture (page vs component boundary) and third-party component selector guidance, replacing inline repetitions across 4 sub-skills
+- `references/templates/` directory with 7 report templates extracted from sub-skills: review-notes, compliance-report, debugging-report, feature-implementation-report, test-implementation-report, test-verification-report, cross-check-report
+- Implementation Sequence section in `references/patterns/dependency-inversion.md` — the 4-step interfaces-first build order, replacing inline copies in feature-planner and feature-implementer
+
+### Changed
+
+- All 10 sub-skills trimmed to reference shared patterns and templates instead of inlining content (1,429 → 940 lines, -34%)
+- `feature-planner.md` and `feature-implementer.md`: replaced inline DIP 4-step sequence with reference to `dependency-inversion.md`
+- `unit-test-planner.md`, `plan-reviewer.md`, `e2e-test-planner.md`, `test-implementer.md`: replaced inline Svelte rules with reference to `svelte-conventions.md`
+- `review-compiler.md`, `design-compliance-checker.md`, `systematic-debugger.md`, `feature-implementer.md`, `test-implementer.md`, `test-verifier.md`, `plan-reviewer.md`: replaced inline report templates with references to `references/templates/`
+
+## [0.13.0] - 2026-02-19
+
+### Added
+
+- Mandatory mockup gate in `brainstormer.md` (step 3) — UI features require a visual mockup shared with and approved by the user before the design doc is written
+- "Middleware & Cross-Cutting Impact Analysis" section in `brainstormer.md` design doc output — enumerates affected routes, at-risk test suites, behavioural changes, and rollback strategy when middleware or cross-cutting logic is introduced
+- Middleware impact planning step in `feature-planner.md` (step 4) — sequences middleware before dependent features, adds explicit E2E run after middleware wiring, and plans updates to affected test suites
+- Early E2E run rule in `feature-implementer.md` (step 5) — run existing E2E tests immediately after wiring cross-cutting middleware, before implementing the rest of the feature
+- Third-party component source reading rule in `e2e-test-planner.md` and `test-implementer.md` — read actual rendered DOM structure from library source before planning or writing selectors for bits-ui, Radix, shadcn, etc.
+- "Fix test infrastructure, not production defaults" rule in `test-verifier.md` — when tests break due to new middleware or environment changes, fix test setup, never weaken production code
+- User-provided test results acceptance rule in `SKILL.md` and `test-verifier.md` — accept user-shared test output as ground truth without re-running via sub-agent
+
+## [0.12.0] - 2026-02-19
+
+### Added
+
+- Scope Check step in `unit-test-planner.md` and `e2e-test-planner.md` — planners now evaluate whether their test type is applicable before planning tests, and can output "Not applicable" with rationale when the feature has no testable units or no user-visible behaviour
+- Test File Architecture validation in `plan-reviewer.md` (step 5) — cross-check now flags `.svelte.test.ts` files planned for page-level route components (`src/routes/`), validates "not applicable" rationale, and verifies coverage handoff between unit and E2E plans
+- "Test File Architecture" section in cross-check report format with checklist items for page/component boundary, scope, rationale, and coverage handoff
+- Test file architecture guideline in `unit-test-planner.md` — component unit tests scoped to `$lib/components/` only, never for page-level routes
+
+### Changed
+
+- SKILL.md stages 3-5: planners may now produce "Not applicable" outputs; corresponding implementation (7a/7b) and verification (7d/7e) stages are skipped when a plan is not applicable
+- SKILL.md stages 7a, 7b, 7d, 7e: each stage checks whether its plan said "Not applicable" before spawning agents, marks task complete immediately and records skip in PROGRESS.md if so
+
 ## [0.11.0] - 2026-02-18
 
 ### Added

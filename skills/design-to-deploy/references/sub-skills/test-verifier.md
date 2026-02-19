@@ -10,6 +10,9 @@ Run all tests and verify they pass now that feature is implemented. Handle test 
 - Feature implementation report: `docs/implementation-reports/feature-implementation-report.md`
 
 ## Process
+
+**User-provided results shortcut**: If the user has already shared test output (terminal paste, screenshot, or summary), accept it as ground truth. Do not re-run the same tests to "confirm" — record the user-provided results in the verification report and proceed to failure analysis (if needed) or mark as passing.
+
 1. **Run Unit Tests**:
    - Use test command from `.design-to-deploy.yml`
    - Capture full output and test results
@@ -45,65 +48,12 @@ docs/test-reports/test-verification-report.md
 ```
 
 ## Required Report Format
-
-```markdown
-## Test Execution Summary
-- Date: {date}
-- Test command (unit): {command used}
-- Test command (E2E): {command used}
-
-## Unit Test Results
-- **Status**: [ALL PASS / SOME FAILED]
-- Total tests: {count}
-- Passed: {count}
-- Failed: {count}
-
-### Test Results Detail
-- {test name}: PASS
-- {test name}: PASS
-- {test name}: FAIL - {error message}
-  - Error context: {relevant output}
-- ...
-
-## E2E Test Results
-- **Status**: [ALL PASS / SOME FAILED]
-- Total tests: {count}
-- Passed: {count}
-- Failed: {count}
-
-### Test Results Detail
-- {test name}: PASS - screenshot captured at {location}
-- {test name}: FAIL - {error message}
-  - Failed at action: {what the test was doing}
-  - Error context: {relevant output}
-- ...
-
-## Failure Analysis
-
-### Attempt 1
-- Issue identified: {what was wrong}
-- Fix applied: {what changed}
-- Command: {fix command/change}
-- Result: [FIXED / STILL FAILING]
-
-### Attempt 2 (if needed)
-- Issue identified: {what was wrong}
-- Fix applied: {what changed}
-- Result: [FIXED / ESCALATED]
-
-## Final Status
-- [READY TO MERGE / ESCALATED TO DEBUGGING]
-- Summary: {one sentence}
-
-## If Escalated
-- Failures summary: {list of still-failing tests}
-- Root causes identified but not fixed: {list}
-- Passed to: systematic-debugger agent
-```
+Use the template at `references/templates/test-verification-report-template.md`.
 
 ## Guidelines
 - Read error messages completely before fixing
 - Check for patterns: are multiple tests failing with same error?
+- **Fix test infrastructure, never production defaults.** When tests break because a new feature changes the environment (new middleware, auth guards, layout wrappers), fix the test setup to accommodate the new behaviour — never weaken or remove production code to make tests pass. Test helpers, fixtures, mock configurations, and setup functions are the correct fix targets.
 - Targeted fixes are better than broad changes
 - Run specific test files, not entire suite when debugging
 - E2E screenshot failures might indicate visual regressions—check diffs
