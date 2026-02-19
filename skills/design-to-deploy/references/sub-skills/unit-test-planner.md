@@ -9,16 +9,7 @@ Create comprehensive unit test plans covering all business logic, edge cases, an
 
 ## Process
 1. **Scope Check — Is a unit test plan needed?**
-   Evaluate whether the feature introduces testable units. Unit tests are appropriate for:
-   - Standalone functions and utility modules
-   - Business logic (stores, state machines, computed values)
-   - Shared UI components in `$lib/components/` (via `.svelte.test.ts` in Svelte projects)
-   - Data transformations, parsers, validators
-
-   Unit tests are **not** appropriate for:
-   - Page-level route components (`src/routes/`) — these are tested via E2E
-   - Pure UI layout refactors with no new logic
-   - Changes that only rearrange existing markup or styling
+   Evaluate whether the feature introduces testable units: standalone functions, business logic, shared UI components, data transformations, parsers, validators. Read `references/patterns/svelte-conventions.md` for project-specific rules on what gets unit tests vs E2E tests.
 
    If the feature has no testable units, output a short plan stating "No unit tests needed" with a rationale explaining why, and list which test type (E2E, manual, etc.) covers the behaviour instead. This is a valid outcome — not every feature needs unit tests.
 
@@ -79,9 +70,8 @@ For each module/component, specify:
 
 ## Guidelines
 - Follow DRY, SOLID, and YAGNI — plan shared test helpers/factories/fixtures, import production constants
-- **Test against abstractions.** If the design doc defines interfaces (see "Interfaces & Contracts" section), plan tests that exercise business logic through those interfaces using test doubles. This makes tests fast, deterministic, and decoupled from infrastructure.
-- **Test file architecture (Svelte projects):** Component unit tests (`.svelte.test.ts`) belong only in `$lib/components/` for shared, reusable components. Never plan `.svelte.test.ts` files for page-level route components under `src/routes/` — page behaviour is validated by E2E tests via Playwright.
-- Plan test doubles (fakes, stubs) that implement the same interfaces as production code. Prefer simple fakes over mocking frameworks.
+- Test against abstractions using test doubles (see `references/patterns/dependency-inversion.md`). Prefer simple fakes over mocking frameworks.
+- Follow test file architecture rules from `references/patterns/svelte-conventions.md`.
 - Plan at least 2-3 tests per public function
 - Include error cases (invalid input, null values, boundary conditions)
 - Edge cases: off-by-one, empty collections, max values, special characters

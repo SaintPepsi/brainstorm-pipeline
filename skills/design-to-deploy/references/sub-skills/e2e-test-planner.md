@@ -10,16 +10,7 @@ Plan end-to-end user journey tests using Playwright, covering real workflows wit
 
 ## Process
 1. **Scope Check — Is an E2E test plan needed?**
-   Evaluate whether the feature affects user-visible behaviour. E2E tests are appropriate for:
-   - Page-level route components and layouts (`src/routes/`)
-   - User-facing workflows (navigation, forms, interactions)
-   - UI layout refactors that change what the user sees or how they interact
-   - Any change where acceptance criteria describe user actions or visual outcomes
-
-   E2E tests are **not** appropriate for:
-   - Pure backend/utility logic with no UI surface
-   - Internal refactors that don't change any user-visible behaviour
-   - Library-level modules consumed only by other code (tested via unit tests)
+   Evaluate whether the feature affects user-visible behaviour: page-level routes, user-facing workflows, UI layout changes, or acceptance criteria describing user actions. Read `references/patterns/svelte-conventions.md` for project-specific rules on what gets E2E tests vs unit tests.
 
    If the feature has no user-visible behaviour to validate, output a short plan stating "No E2E tests needed" with a rationale explaining why, and list which test type (unit, integration, etc.) covers the behaviour instead. This is a valid outcome.
 
@@ -95,9 +86,9 @@ tests/e2e/
 - Note any expected visual variations (responsive breakpoints)
 
 ## Guidelines
-- **Read third-party component source before planning selectors.** When the app uses a component library (bits-ui, Radix, shadcn, etc.), read the actual rendered DOM structure from the library's source or documentation before specifying selectors. Third-party components often render wrapper elements, portals, or non-obvious `data-*` attributes that naive selectors will miss. Plan selectors based on what the component actually renders, not what you assume it renders.
+- Read third-party component source before planning selectors (see `references/patterns/svelte-conventions.md`).
 - Follow DRY, SOLID, and YAGNI — plan shared page objects/helpers, import production constants
-- **Leverage Dependency Inversion for test infrastructure.** Where the application uses DIP (interfaces for external services, databases, etc.), plan E2E test setup that wires test-specific implementations (in-memory stores, mock APIs) at the composition root.
+- Leverage Dependency Inversion for test infrastructure (see `references/patterns/dependency-inversion.md`).
 - Plan 1-3 E2E tests per major user story
 - Include a happy path journey
 - Cover at least one error case per feature

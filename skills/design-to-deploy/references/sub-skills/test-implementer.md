@@ -21,7 +21,7 @@ Write actual test files from test plans. Tests MUST FAIL initially because the f
 3. **Implement E2E Tests**:
    - Create test file(s) in `tests/e2e/` directory
    - Use Playwright framework
-   - **Read third-party component source first**: Before writing selectors for any component library (bits-ui, Radix, shadcn, etc.), read the library's component source code in `node_modules` or documentation to understand the actual rendered DOM structure, wrapper elements, portals, and `data-*` attributes. Never guess at selectors.
+   - Read third-party component source before writing selectors (see `references/patterns/svelte-conventions.md`)
    - Follow page object model or similar pattern
    - Include screenshot capture logic
    - Add comments explaining each action/assertion pair
@@ -48,52 +48,11 @@ docs/test-reports/test-implementation-report.md
 ```
 
 ## Required Report Format
-
-```markdown
-## Unit Test Implementation
-- Test file(s) created: {list paths}
-- Total unit tests written: {count}
-- Framework: {jest | vitest | mocha | other}
-- Test command: {exact command used}
-
-## Unit Test Execution Results
-- Status: ALL TESTS FAILING (expected)
-- Failures summary:
-  - {test name}: {failure reason - typically "feature not yet implemented"}
-  - {test name}: {failure reason}
-  - ...
-- Passing tests: {count}
-- Failing tests: {count}
-
-## E2E Test Implementation
-- Test file(s) created: {list paths}
-- Total E2E tests written: {count}
-- Framework: Playwright
-- Test command: {exact command used}
-
-## E2E Test Execution Results
-- Status: ALL TESTS FAILING (expected)
-- Sample failures:
-  - {test name}: {failure reason - typically "page not found" or "button not found"}
-  - {test name}: {failure reason}
-- Passing tests: {count}
-- Failing tests: {count}
-
-## Test Quality Checks
-- [ ] All tests have clear, descriptive names
-- [ ] All assertions are specific (not vague)
-- [ ] Setup/teardown is properly structured
-- [ ] Mocks are configured correctly
-- [ ] E2E tests capture screenshots at key points
-- [ ] No hardcoded timeouts (or documented if necessary)
-
-## Next Steps
-Feature implementation should make these tests pass.
-```
+Use the template at `references/templates/test-implementation-report-template.md`.
 
 ## Guidelines
 - Follow DRY, SOLID, and YAGNI — create shared helpers/factories first, import production constants
-- **Apply Dependency Inversion in tests.** When the production code defines interfaces (repositories, clients, services), create test doubles (fakes, stubs) that implement those same interfaces. Test business logic through the abstractions. Prefer simple in-memory fakes over mocking frameworks — they're easier to debug and maintain. Read `references/patterns/dependency-inversion.md` for the full pattern.
+- Apply Dependency Inversion in tests — test doubles implement the same interfaces as production code (see `references/patterns/dependency-inversion.md`).
 - Write tests that are easy to debug when they fail
 - Use descriptive test names: "should return X when given Y"
 - Test behavior, not implementation details

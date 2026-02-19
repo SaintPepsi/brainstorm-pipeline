@@ -3,6 +3,21 @@
 All notable changes to the `design-to-deploy` skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2026-02-19
+
+### Added
+
+- `references/patterns/svelte-conventions.md` — centralised Svelte-specific rules for test file architecture (page vs component boundary) and third-party component selector guidance, replacing inline repetitions across 4 sub-skills
+- `references/templates/` directory with 7 report templates extracted from sub-skills: review-notes, compliance-report, debugging-report, feature-implementation-report, test-implementation-report, test-verification-report, cross-check-report
+- Implementation Sequence section in `references/patterns/dependency-inversion.md` — the 4-step interfaces-first build order, replacing inline copies in feature-planner and feature-implementer
+
+### Changed
+
+- All 10 sub-skills trimmed to reference shared patterns and templates instead of inlining content (1,429 → 940 lines, -34%)
+- `feature-planner.md` and `feature-implementer.md`: replaced inline DIP 4-step sequence with reference to `dependency-inversion.md`
+- `unit-test-planner.md`, `plan-reviewer.md`, `e2e-test-planner.md`, `test-implementer.md`: replaced inline Svelte rules with reference to `svelte-conventions.md`
+- `review-compiler.md`, `design-compliance-checker.md`, `systematic-debugger.md`, `feature-implementer.md`, `test-implementer.md`, `test-verifier.md`, `plan-reviewer.md`: replaced inline report templates with references to `references/templates/`
+
 ## [0.13.0] - 2026-02-19
 
 ### Added

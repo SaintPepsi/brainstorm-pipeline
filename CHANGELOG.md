@@ -4,6 +4,12 @@ All notable changes to the brainstorm-pipeline plugin will be documented in this
 For skill-specific changes, see the CHANGELOG.md in each skill directory.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-02-19
+
+### Changed
+
+- `design-to-deploy` skill: consolidated sub-skill bloat — extracted Svelte-specific rules into `references/patterns/svelte-conventions.md`, DIP implementation sequence into `dependency-inversion.md`, and 7 report templates into `references/templates/`; trimmed all sub-skills from 1,429 to 940 lines (-34%) by replacing inline repetitions with one-line references
+
 ## [1.7.0] - 2026-02-19
 
 ### Added
