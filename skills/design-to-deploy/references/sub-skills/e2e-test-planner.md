@@ -9,20 +9,34 @@ Plan end-to-end user journey tests using Playwright, covering real workflows wit
 - Project test configuration from `.design-to-deploy.yml`
 
 ## Process
-1. **Extract User Journeys**: From user stories and acceptance criteria, identify:
+1. **Scope Check — Is an E2E test plan needed?**
+   Evaluate whether the feature affects user-visible behaviour. E2E tests are appropriate for:
+   - Page-level route components and layouts (`src/routes/`)
+   - User-facing workflows (navigation, forms, interactions)
+   - UI layout refactors that change what the user sees or how they interact
+   - Any change where acceptance criteria describe user actions or visual outcomes
+
+   E2E tests are **not** appropriate for:
+   - Pure backend/utility logic with no UI surface
+   - Internal refactors that don't change any user-visible behaviour
+   - Library-level modules consumed only by other code (tested via unit tests)
+
+   If the feature has no user-visible behaviour to validate, output a short plan stating "No E2E tests needed" with a rationale explaining why, and list which test type (unit, integration, etc.) covers the behaviour instead. This is a valid outcome.
+
+2. **Extract User Journeys**: From user stories and acceptance criteria, identify:
    - Primary user workflows
    - Critical happy paths
    - Edge cases affecting user experience
    - Error scenarios users might encounter
 
-2. **Map to Playwright Scenarios**: For each journey, define:
+3. **Map to Playwright Scenarios**: For each journey, define:
    - Initial state/setup
    - User actions (clicks, input, navigation)
    - Expected UI changes
    - Visual regression points
    - Final verification
 
-3. **Plan Visual Assertions**: Identify points where:
+4. **Plan Visual Assertions**: Identify points where:
    - Screenshots should be captured (after major changes)
    - Visual stability should be asserted
    - Layout/rendering should be validated

@@ -4,6 +4,12 @@ All notable changes to the brainstorm-pipeline plugin will be documented in this
 For skill-specific changes, see the CHANGELOG.md in each skill directory.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-02-19
+
+### Added
+
+- `design-to-deploy` skill: test plan scope checks and test file architecture validation — planners evaluate applicability before generating plans (unit tests only for standalone logic and `$lib/components/`, not page-level routes), cross-check reviewer flags `.svelte.test.ts` files outside `$lib/components/` and validates "not applicable" rationale, pipeline stages skip gracefully when a test type is not needed
+
 ## [1.5.0] - 2026-02-18
 
 ### Added

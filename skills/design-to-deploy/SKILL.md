@@ -222,6 +222,7 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 - Agent 1 → reads `references/sub-skills/unit-test-planner.md` + design doc → `session-history/${SESSION_ID}/03-unit-test-plan.md`
 - Agent 2 → reads `references/sub-skills/e2e-test-planner.md` + design doc → `session-history/${SESSION_ID}/04-e2e-test-plan.md`
 - Agent 3 → reads `references/sub-skills/feature-planner.md` + design doc → `session-history/${SESSION_ID}/05-feature-plan.md`
+- **Not-applicable outputs:** A planner may determine that its test type is not needed for this feature (e.g. a UI layout refactor needs no unit tests, or a pure utility module needs no E2E tests). This is a valid outcome — the planner writes a short plan stating "Not applicable" with rationale. The corresponding implementation stage (7a/7b) and verification stage (7d/7e) are then skipped. Record the skip reason in `PROGRESS.md`.
 - Commit: `plan(${TOPIC}): all plans generated`
 - Mark all three planning tasks as complete.
 - **Run `/compact` after collecting results**
@@ -232,13 +233,13 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 - Commit: `plan(${TOPIC}): cross-check complete`
 - Mark the "Cross-check plans" task as complete.
 
-**Stage 7a — Implement Unit Tests:** Mark the "Implement unit tests (failing)" task as in-progress. Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-implementer.md` + unit test plan. Writes tests that **must fail** (feature doesn't exist yet). Run test command to confirm failure.
+**Stage 7a — Implement Unit Tests:** If the unit test plan says "Not applicable", mark "Implement unit tests (failing)" as complete immediately (no agent spawn needed) and note the skip in `PROGRESS.md`. Otherwise: mark as in-progress, spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-implementer.md` + unit test plan. Writes tests that **must fail** (feature doesn't exist yet). Run test command to confirm failure.
 
 - Commit: `test(${TOPIC}): unit tests implemented (failing)`
 - Mark the "Implement unit tests (failing)" task as complete.
 - **Save the agent ID for reuse in 7b.**
 
-**Stage 7b — Implement E2E Tests:** Mark the "Implement E2E tests (failing)" task as in-progress. **Resume the 7a agent** (same sub-skill, same codebase understanding) → pass the e2e test plan path. Tests **must fail**. Run test command to confirm failure.
+**Stage 7b — Implement E2E Tests:** If the E2E test plan says "Not applicable", mark "Implement E2E tests (failing)" as complete immediately and note the skip in `PROGRESS.md`. Otherwise: mark as in-progress, **resume the 7a agent** (same sub-skill, same codebase understanding) → pass the e2e test plan path. Tests **must fail**. Run test command to confirm failure.
 
 - Commit: `test(${TOPIC}): e2e tests implemented (failing)`
 - Update `PROGRESS.md` with completed stages.
@@ -250,13 +251,13 @@ Once the design doc is committed, **run `/compact` to clear the brainstorm conve
 - Mark the "Implement feature" task as complete.
 - **Run `/compact` after implementation completes**
 
-**Stage 7d — Verify Unit Tests:** Mark the "Verify unit tests pass" task as in-progress. Spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-verifier.md` + `PROGRESS.md`. Runs unit tests. If they fail, apply retry logic (see below). **Include iteration limit in prompt: "You have 2 attempts to fix failing tests."**
+**Stage 7d — Verify Unit Tests:** If unit tests were skipped (plan said "Not applicable"), mark "Verify unit tests pass" as complete immediately. Otherwise: mark as in-progress, spawn Task agent (model: `sonnet`) → reads `references/sub-skills/test-verifier.md` + `PROGRESS.md`. Runs unit tests. If they fail, apply retry logic (see below). **Include iteration limit in prompt: "You have 2 attempts to fix failing tests."**
 
 - Commit: `test(${TOPIC}): unit tests passing`
 - Mark the "Verify unit tests pass" task as complete.
 - **Save the agent ID for reuse in 7e.**
 
-**Stage 7e — Verify E2E Tests:** Mark the "Verify E2E tests pass" task as in-progress. **Resume the 7d agent** (same verification context) → pass e2e test command. Runs e2e tests. Apply retry logic if needed. **Include iteration limit in prompt: "You have 2 attempts to fix failing tests."**
+**Stage 7e — Verify E2E Tests:** If E2E tests were skipped (plan said "Not applicable"), mark "Verify E2E tests pass" as complete immediately. Otherwise: mark as in-progress, **resume the 7d agent** (same verification context) → pass e2e test command. Runs e2e tests. Apply retry logic if needed. **Include iteration limit in prompt: "You have 2 attempts to fix failing tests."**
 
 - Commit: `test(${TOPIC}): e2e tests passing`
 - Update `PROGRESS.md` with verification results.

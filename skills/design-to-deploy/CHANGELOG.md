@@ -3,6 +3,20 @@
 All notable changes to the `design-to-deploy` skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-02-19
+
+### Added
+
+- Scope Check step in `unit-test-planner.md` and `e2e-test-planner.md` — planners now evaluate whether their test type is applicable before planning tests, and can output "Not applicable" with rationale when the feature has no testable units or no user-visible behaviour
+- Test File Architecture validation in `plan-reviewer.md` (step 5) — cross-check now flags `.svelte.test.ts` files planned for page-level route components (`src/routes/`), validates "not applicable" rationale, and verifies coverage handoff between unit and E2E plans
+- "Test File Architecture" section in cross-check report format with checklist items for page/component boundary, scope, rationale, and coverage handoff
+- Test file architecture guideline in `unit-test-planner.md` — component unit tests scoped to `$lib/components/` only, never for page-level routes
+
+### Changed
+
+- SKILL.md stages 3-5: planners may now produce "Not applicable" outputs; corresponding implementation (7a/7b) and verification (7d/7e) stages are skipped when a plan is not applicable
+- SKILL.md stages 7a, 7b, 7d, 7e: each stage checks whether its plan said "Not applicable" before spawning agents, marks task complete immediately and records skip in PROGRESS.md if so
+
 ## [0.11.0] - 2026-02-18
 
 ### Added

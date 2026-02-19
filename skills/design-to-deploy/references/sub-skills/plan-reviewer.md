@@ -29,12 +29,17 @@ Cross-check all planning documents for gaps, inconsistencies, and interface mism
    - Function signatures match between tests and feature code
    - Database schema (if changed) aligns with test data expectations
 
-5. **Check Edge Cases**:
+5. **Validate Test File Architecture**:
+   - **Page vs component boundary**: In Svelte projects, `.svelte.test.ts` unit tests belong only in `$lib/components/` for shared, reusable components. If the unit test plan places `.svelte.test.ts` files under `src/routes/` (page-level route components), flag this as an architecture violation — page behaviour must be tested via E2E (Playwright `.spec.ts`), not component unit tests.
+   - **Not-applicable checks**: If a planner output says "No unit tests needed" or "No E2E tests needed", verify the rationale is sound — the skipped test type's coverage must be handled by the other type or by the nature of the change.
+   - **Coverage handoff**: When unit tests are skipped, confirm the E2E plan covers the acceptance criteria that would otherwise be unit-tested (and vice versa). No acceptance criterion should fall through the gap.
+
+6. **Check Edge Cases**:
    - Does feature plan handle all error cases in test plan?
    - Are validation rules in feature code same as validation tests?
    - Special cases: null, empty, boundary values covered?
 
-6. **Check Dependency Inversion** (read `references/patterns/dependency-inversion.md` for full details):
+7. **Check Dependency Inversion** (read `references/patterns/dependency-inversion.md` for full details):
    - Does the feature plan define interfaces/abstractions before implementations?
    - Are interfaces owned by the domain/business layer?
    - Does business logic depend only on its own abstractions?
@@ -42,7 +47,7 @@ Cross-check all planning documents for gaps, inconsistencies, and interface mism
    - Do test plans use test doubles that implement the same interfaces as production code?
    - Flag violations: business logic importing infrastructure, dependencies constructed internally, leaky abstractions.
 
-7. **Patch and Update**: For any gaps, inconsistencies, or missing items:
+8. **Patch and Update**: For any gaps, inconsistencies, or missing items:
    - Add them to appropriate plan(s)
    - Ensure cross-references are updated
    - Note rationale for additions
@@ -80,6 +85,14 @@ docs/cross-check-report.md
 - Issues found:
   - {describe issue and which documents affected}
 
+## Test File Architecture
+- [ ] No `.svelte.test.ts` files planned for page-level route components (`src/routes/`)
+- [ ] Component unit tests scoped to shared `$lib/components/` only
+- [ ] "Not applicable" planner decisions have sound rationale
+- [ ] Coverage handoff verified — no acceptance criteria lost between unit and E2E plans
+- Issues found:
+  - {describe violations and recommended fixes}
+
 ## Edge Case Coverage
 - Missing edge cases:
   - {describe case and which plans need updates}
@@ -111,3 +124,4 @@ docs/cross-check-report.md
 - Catch gaps now — they're cheaper to fix than during implementation
 - Document your reasoning for all patches
 - Flag anything ambiguous
+- **Flag test file architecture violations** — unit tests for page-level route components, `.svelte.test.ts` files outside `$lib/components/`, or missing coverage when a planner declares "not applicable"
