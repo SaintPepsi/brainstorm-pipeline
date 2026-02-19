@@ -4,6 +4,12 @@ All notable changes to the brainstorm-pipeline plugin will be documented in this
 For skill-specific changes, see the CHANGELOG.md in each skill directory.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-02-19
+
+### Added
+
+- `design-to-deploy` skill: pipeline retrospective improvements — mandatory mockup gate for UI features before design doc, middleware/cross-cutting impact analysis section in design doc, early E2E run after middleware wiring, third-party component source reading before writing selectors, "fix test infra not production defaults" rule, and user-provided test results acceptance to avoid redundant re-verification
+
 ## [1.6.0] - 2026-02-19
 
 ### Added

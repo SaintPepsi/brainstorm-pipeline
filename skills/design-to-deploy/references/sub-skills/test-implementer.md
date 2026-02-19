@@ -21,6 +21,7 @@ Write actual test files from test plans. Tests MUST FAIL initially because the f
 3. **Implement E2E Tests**:
    - Create test file(s) in `tests/e2e/` directory
    - Use Playwright framework
+   - **Read third-party component source first**: Before writing selectors for any component library (bits-ui, Radix, shadcn, etc.), read the library's component source code in `node_modules` or documentation to understand the actual rendered DOM structure, wrapper elements, portals, and `data-*` attributes. Never guess at selectors.
    - Follow page object model or similar pattern
    - Include screenshot capture logic
    - Add comments explaining each action/assertion pair

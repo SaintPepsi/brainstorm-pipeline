@@ -95,6 +95,7 @@ tests/e2e/
 - Note any expected visual variations (responsive breakpoints)
 
 ## Guidelines
+- **Read third-party component source before planning selectors.** When the app uses a component library (bits-ui, Radix, shadcn, etc.), read the actual rendered DOM structure from the library's source or documentation before specifying selectors. Third-party components often render wrapper elements, portals, or non-obvious `data-*` attributes that naive selectors will miss. Plan selectors based on what the component actually renders, not what you assume it renders.
 - Follow DRY, SOLID, and YAGNI — plan shared page objects/helpers, import production constants
 - **Leverage Dependency Inversion for test infrastructure.** Where the application uses DIP (interfaces for external services, databases, etc.), plan E2E test setup that wires test-specific implementations (in-memory stores, mock APIs) at the composition root.
 - Plan 1-3 E2E tests per major user story

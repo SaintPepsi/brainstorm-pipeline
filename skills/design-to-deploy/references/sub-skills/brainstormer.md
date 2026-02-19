@@ -24,9 +24,12 @@ Transform a rough idea into a structured design document through dialogue with t
    - Are there constraints or dependencies?
    - How should it interact with existing features?
 
-3. **Iterate on the Design**: Refine based on user feedback. Ask follow-ups. Validate your understanding before documenting. Don't assume — confirm.
+3. **Share a Mockup for UI Features** (mandatory gate):
+   If the feature has any user-visible UI changes, you MUST share a visual representation (ASCII diagram, markup sketch, or description of layout/component structure) with the user and get explicit approval **before** writing the design doc. This prevents the largest source of rework — implementing a UI that doesn't match the user's mental model. Skip this step only for purely backend/logic changes with no UI surface.
 
-4. **Write the Design Doc**: Once the user is satisfied, produce the document.
+4. **Iterate on the Design**: Refine based on user feedback. Ask follow-ups. Validate your understanding before documenting. Don't assume — confirm.
+
+5. **Write the Design Doc**: Once the user is satisfied (and the mockup is approved for UI features), produce the document.
 
 ## Output
 
@@ -72,6 +75,16 @@ Identify every boundary where business logic meets infrastructure (databases, AP
 - **Known implementations**: which concrete implementations are expected (production, test doubles)
 
 This section drives the entire implementation sequence — interfaces are created first, implementations second, wiring last. If this section is empty or missing, the feature has no external boundaries and DIP does not apply.
+
+### Middleware & Cross-Cutting Impact Analysis
+**Include this section when the feature adds or modifies middleware, guards, layouts, or any logic applied to multiple routes.**
+
+- **Affected routes/layouts**: List every route or layout group touched by the middleware
+- **Existing test suites at risk**: Enumerate specific test files (unit and E2E) that exercise the affected routes — these will need to be re-run or updated
+- **Behavioural changes to existing pages**: Describe how current pages will behave differently (redirects, new guards, altered headers, etc.)
+- **Migration/rollback**: How to disable the middleware if it causes failures
+
+If this section is empty or missing, the feature has no cross-cutting concerns and impact analysis does not apply.
 
 ### Risks & Assumptions
 - **Risks**: Potential technical or scope challenges

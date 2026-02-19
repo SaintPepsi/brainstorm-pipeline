@@ -3,6 +3,18 @@
 All notable changes to the `design-to-deploy` skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-02-19
+
+### Added
+
+- Mandatory mockup gate in `brainstormer.md` (step 3) — UI features require a visual mockup shared with and approved by the user before the design doc is written
+- "Middleware & Cross-Cutting Impact Analysis" section in `brainstormer.md` design doc output — enumerates affected routes, at-risk test suites, behavioural changes, and rollback strategy when middleware or cross-cutting logic is introduced
+- Middleware impact planning step in `feature-planner.md` (step 4) — sequences middleware before dependent features, adds explicit E2E run after middleware wiring, and plans updates to affected test suites
+- Early E2E run rule in `feature-implementer.md` (step 5) — run existing E2E tests immediately after wiring cross-cutting middleware, before implementing the rest of the feature
+- Third-party component source reading rule in `e2e-test-planner.md` and `test-implementer.md` — read actual rendered DOM structure from library source before planning or writing selectors for bits-ui, Radix, shadcn, etc.
+- "Fix test infrastructure, not production defaults" rule in `test-verifier.md` — when tests break due to new middleware or environment changes, fix test setup, never weaken production code
+- User-provided test results acceptance rule in `SKILL.md` and `test-verifier.md` — accept user-shared test output as ground truth without re-running via sub-agent
+
 ## [0.12.0] - 2026-02-19
 
 ### Added

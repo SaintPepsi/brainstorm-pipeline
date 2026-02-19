@@ -32,7 +32,10 @@ Implement the actual feature code by following the feature plan step-by-step. Th
    - Use consistent naming with rest of codebase
    - Remove dead code and debug statements before committing
 
-5. **Verify Implementation**:
+5. **Run E2E Tests After Middleware** (mandatory for cross-cutting changes):
+   If the feature plan includes middleware, guards, layouts, or any logic applied to multiple routes: run existing E2E tests against the affected routes **immediately after wiring the middleware**, before implementing the rest of the feature. This catches breakage early — don't wait until the feature is complete. If existing tests fail due to the middleware, fix the test infrastructure (not production defaults) to accommodate the new behaviour.
+
+6. **Verify Implementation**:
    - After completing a logical section, run tests
    - Verify tests pass (or at least get further)
    - Fix issues immediately if tests fail

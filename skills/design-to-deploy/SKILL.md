@@ -334,6 +334,8 @@ When tests fail during verification:
 
 **Red flags that trigger immediate STOP**: "quick fix for now", multiple changes at once, 3+ failed attempts without clear progress, context exceeding 100K tokens in a verification agent.
 
+**User-provided test results**: If the user shares test output (terminal paste, screenshot, or summary) during verification, accept it as ground truth. Do NOT spawn a sub-agent to re-run the same tests just to "confirm" — this wastes tokens and time. Record the user-provided results in the test verification report and proceed. Only re-run tests if you need to verify a *fix* you applied, or if the user explicitly asks you to run them.
+
 ## Scope Validation Heuristics
 
 Flag for splitting when any of these are true:

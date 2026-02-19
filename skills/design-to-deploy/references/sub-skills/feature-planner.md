@@ -24,7 +24,14 @@ Create detailed implementation roadmap with file structure, code changes, and st
    - UI/integration layers depend on abstractions.
    - If the design doc has an "Interfaces & Contracts" section, use it to drive this sequence directly.
 
-4. **Add Code Guidance**: For each step, include:
+4. **Plan Middleware / Cross-Cutting Impact** (if applicable):
+   If the design doc has a "Middleware & Cross-Cutting Impact Analysis" section:
+   - Sequence middleware implementation **before** the features that depend on it
+   - Add an explicit step to run existing E2E tests against affected routes immediately after the middleware is wired — don't wait until feature completion
+   - Plan updates to any existing test suites listed in the impact analysis
+   - Flag routes where the new middleware changes the default behaviour (e.g. unauthenticated → authenticated, new response headers)
+
+5. **Add Code Guidance**: For each step, include:
    - What needs to be written
    - Code snippets showing approach/patterns
    - Reference to similar code in project
