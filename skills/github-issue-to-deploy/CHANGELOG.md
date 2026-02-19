@@ -3,6 +3,22 @@
 All notable changes to the `github-issue-to-deploy` skill will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-02-18
+
+### Added
+
+- PROGRESS.md integration: worktree setup copies template, Phase 0 and Phase 1 outputs update PROGRESS.md, compaction checkpoints require PROGRESS.md update before compacting
+- Explicit prompt wording in Test Verification Retry Logic per attempt level
+- Failure report path (`08-test-results/failure-report.md`) and PROGRESS.md update on pipeline stop
+- 100K token context red flag for verification agents
+
+### Changed
+
+- Stage 7a: reads PROGRESS.md as input, saves agent ID for reuse in 7b
+- Stage 7b: resumes 7a agent instead of spawning fresh, updates PROGRESS.md with test implementation details
+- Stage 7d: reads PROGRESS.md, includes iteration limit in prompt, saves agent ID for reuse in 7e
+- Stage 7e: resumes 7d agent instead of spawning fresh, includes iteration limit, updates PROGRESS.md with verification results
+
 ## [0.9.0] - 2026-02-16
 
 ### Changed
